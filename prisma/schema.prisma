@@ -7,3 +7,14 @@ generator client {
   output      = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
+
+model Drink {
+  id          Int     @id @default(autoincrement())
+  title       String  @db.VarChar(40)
+  description String  @db.Text
+  abv         Decimal @db.Decimal(5, 2)
+  rating      Int     @db.SmallInt
+  price       Decimal @db.Decimal(10, 2)
+
+  @@map("Drinks")
+}
