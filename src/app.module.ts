@@ -5,10 +5,11 @@ import { HttpModule } from '@nestjs/axios';
 import { GifController } from './gif/gif.controller';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
+import { DrinkModule } from './drink/drink.module';
 
 
 @Module({
-  imports: [HttpModule, PrismaModule],
+  imports: [HttpModule, PrismaModule, DrinkModule],
   controllers: [AppController, GifController],
   providers: [AppService],
 })
