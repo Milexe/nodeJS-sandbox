@@ -13,7 +13,7 @@ export class DrinkService {
     const newDrink = await prisma.drink.create({
       data: createDrinkDto,
     })
-    return 'Drink added successfully: ' + newDrink.title;
+    return 'Drink added successfully: ' + newDrink.title + ' small change for merge request';
   }
 
   async findAll(title: string) {
