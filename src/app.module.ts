@@ -6,10 +6,10 @@ import { GifController } from './gif/gif.controller';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { DrinkModule } from './drink/drink.module';
-
+import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [HttpModule, PrismaModule, DrinkModule],
+  imports: [HttpModule, PrismaModule, DrinkModule, UsersModule],
   controllers: [AppController, GifController],
   providers: [AppService],
 })
