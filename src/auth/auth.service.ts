@@ -24,7 +24,9 @@ export class AuthService {
       throw new UnauthorizedException('Неверный email или пароль');
     }
 
-    const payload = { sub: user.id, email: user.email };
+    
+    
+    const payload = { sub: user.id, email: user.email, role: user.role };
 
     const [accessToken, refreshToken] = await Promise.all([
         this.jwtService.signAsync(payload, {
@@ -38,5 +40,17 @@ export class AuthService {
       ]);
 
     return { accessToken, refreshToken };
+  }   
+
+  async getMe(userId: string) {
+    const user = await this.usersService.findById(userId);
+  
+    if (!user) {
+      throw new UnauthorizedException('Пользователь не найден');
+    }
+  
+    const { passwordHash, createdAt, ...result } = user;
+  
+    return result;
   }
 }
