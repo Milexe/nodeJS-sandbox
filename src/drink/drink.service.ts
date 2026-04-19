@@ -31,7 +31,7 @@ export class DrinkService {
     return drink;
   } catch (error) {
     console.log(error);
-throw new HttpException('Mariya is a teapot', HttpStatus.I_AM_A_TEAPOT);
+throw new HttpException('Roman is a teapot', HttpStatus.I_AM_A_TEAPOT);
 }
   } 
 
