@@ -7,15 +7,15 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.prisma!.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
   async findById(id: string) {
-    return this.prisma.prisma!.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
   async create(email: string, passwordHash: string): Promise<User> {
-    return this.prisma.prisma!.user.create({
+    return this.prisma.user.create({
       data: { email, passwordHash },
     });
   }
