@@ -4,6 +4,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import pg from 'pg';
 import { registerDrinkTools } from './tools/drinks-tools.mjs';
+import { registerDrinkResources } from './tools/drinks-resources.mjs';
+import { registerDrinkPrompts } from './tools/drinks-prompts.mjs';
 
 const { Pool } = pg;
 
@@ -24,6 +26,8 @@ const server = new McpServer({
 });
 
 registerDrinkTools(server, pool);
+registerDrinkResources(server, pool);
+registerDrinkPrompts(server);
 
 process.on('SIGINT', async () => {
   await pool.end();

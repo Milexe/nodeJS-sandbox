@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeMCPExecution": [
+      {
+        "command": "node .cursor/hooks/log-mcp.mjs"
+      }
+    ]
+  }
+}
