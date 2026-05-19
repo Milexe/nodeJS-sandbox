@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "d:/nodejs_sandbox/nodeJS-sandbox"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/app"
+      ]
+    },
+    "app-local": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp/app-server.mjs"
+      ],
+      "envFile": "${workspaceFolder}/.env"
+    },
+    "open-mcp-autobahn": {
+      "url": "https://mcp.open-mcp.org/api/server/autobahn@latest/mcp"
+    }
+  }
+}
