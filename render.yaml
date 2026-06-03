@@ -1,0 +1,29 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Connect repo in Render Dashboard → New → Blueprint, or create Web Service manually with these commands.
+services:
+  - type: web
+    name: nodejs-sandbox-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm run start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRES_IN
+        value: "900"
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: "604800"
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ARTSEARCH_SECRET
+        sync: false
