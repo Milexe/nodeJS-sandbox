@@ -1,5 +1,6 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
 # Connect repo in Render Dashboard → New → Blueprint, or create Web Service manually with these commands.
+# Root Directory MUST be empty (repo root). If set to "src", start looks for src/dist/main and fails.
 services:
   - type: web
     name: nodejs-sandbox-api
@@ -7,9 +8,10 @@ services:
     plan: free
     region: frankfurt
     branch: main
+    rootDir: .
     # NODE_ENV=production skips devDependencies; Nest CLI lives in devDependencies
     buildCommand: NPM_CONFIG_PRODUCTION=false npm ci && npx prisma generate && npm run build
-    startCommand: npx prisma migrate deploy && npm run start:prod
+    startCommand: npx prisma migrate deploy && node dist/src/main.js
     healthCheckPath: /health
     envVars:
       # Do not set NODE_ENV=production here — it breaks npm ci (no @nestjs/cli). Render sets production at runtime.
