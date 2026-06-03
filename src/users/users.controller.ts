@@ -1,12 +1,19 @@
-import { Controller, Post, Body, ConflictException, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  ConflictException,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
-  
+
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  
+
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: CreateUserDto) {
@@ -20,12 +27,17 @@ export class UsersController {
     try {
       const user = await this.usersService.create(dto.email, passwordHash);
       return { id: user.id, email: user.email, createdAt: user.createdAt };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // P2002 — Prisma unique constraint violation (race condition)
-      if (error?.code === 'P2002') {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
         throw new ConflictException('Email already exists');
       }
       throw error;
     }
   }
-  }
+}

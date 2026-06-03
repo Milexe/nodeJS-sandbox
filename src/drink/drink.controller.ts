@@ -1,8 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { DrinkService } from './drink.service';
 import { CreateDrinkDto } from './dto/create-drink.dto';
 import { UpdateDrinkDto } from './dto/update-drink.dto';
-import { title } from 'process';
 
 @Controller('drink')
 export class DrinkController {
@@ -14,8 +22,8 @@ export class DrinkController {
   }
 
   @Get()
-  findAll(@Query() query: Record<string, any>) {
-    return this.drinkService.findAll(query['title']);
+  findAll(@Query('title') title?: string) {
+    return this.drinkService.findAll(title);
   }
 
   @Get(':id')

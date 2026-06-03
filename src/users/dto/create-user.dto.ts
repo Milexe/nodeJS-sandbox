@@ -3,7 +3,9 @@ import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'Некорректный формат email' })
-  @Transform(({ value }) => value.trim().toLowerCase())
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   email: string;
 
   @IsString()

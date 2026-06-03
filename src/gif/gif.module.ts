@@ -9,8 +9,6 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 })
 export class GifModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes('gif');
+    consumer.apply(LoggerMiddleware).forRoutes('gif');
   }
 }

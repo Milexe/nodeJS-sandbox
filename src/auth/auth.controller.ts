@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards, } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from './guards/auth.guard';
@@ -21,23 +30,23 @@ export class AuthController {
   async refresh(@Body() body: { refreshToken: string }) {
     return this.authService.refresh(body.refreshToken);
   }
-  
+
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Body() body: { refreshToken: string }) {
     return this.authService.logout(body.refreshToken);
   }
-  
+
   @UseGuards(AuthGuard)
   @Get('me')
   async getMe(@Req() req: Request) {
-    return this.authService.getMe(req['user'].sub);
+    return this.authService.getMe(req.user!.sub);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Get('admin')
-  async adminOnly() {
+  adminOnly() {
     return { message: 'Доступ только для админов' };
   }
 }

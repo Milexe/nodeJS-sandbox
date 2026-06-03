@@ -6,13 +6,11 @@ import type { Drink } from '../types/drink'
 export default function DrinkDetailPage() {
   const { id } = useParams()
   const [drink, setDrink] = useState<Drink | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(Boolean(id))
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) {
-      setError('Missing drink id')
-      setLoading(false)
       return
     }
 
@@ -46,6 +44,15 @@ export default function DrinkDetailPage() {
       cancelled = true
     }
   }, [id])
+
+  if (!id) {
+    return (
+      <>
+        <p className="status error">Error: Missing drink id</p>
+        <Link to="/drinks">← Back to list</Link>
+      </>
+    )
+  }
 
   if (loading) {
     return <p className="status">Loading…</p>
