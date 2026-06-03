@@ -27,5 +27,7 @@ services:
         value: "604800"
       - key: CORS_ORIGIN
         sync: false
+      - key: CORS_ALLOW_VERCEL_PREVIEW
+        value: "true"
       - key: ARTSEARCH_SECRET
         sync: false
