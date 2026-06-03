@@ -7,12 +7,12 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    buildCommand: npm ci && npx prisma generate && npm run build
+    # NODE_ENV=production skips devDependencies; Nest CLI lives in devDependencies
+    buildCommand: NPM_CONFIG_PRODUCTION=false npm ci && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && npm run start:prod
     healthCheckPath: /health
     envVars:
-      - key: NODE_ENV
-        value: production
+      # Do not set NODE_ENV=production here — it breaks npm ci (no @nestjs/cli). Render sets production at runtime.
       - key: DATABASE_URL
         sync: false
       - key: JWT_ACCESS_SECRET
