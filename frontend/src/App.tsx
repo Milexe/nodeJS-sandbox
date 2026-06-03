@@ -3,6 +3,7 @@ import DrinkDetailPage from './pages/DrinkDetailPage'
 import DrinksListPage from './pages/DrinksListPage'
 import './App.css'
 
+// Preview deployment smoke test (safe to remove)
 export default function App() {
   return (
     <BrowserRouter>
