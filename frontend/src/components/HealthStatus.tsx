@@ -32,15 +32,10 @@ export default function HealthStatus() {
   const [result, setResult] = useState<HealthCheckResult | null>(null)
   const indicatorState = toIndicatorState(result)
 
-  const runCheck = useCallback(async () => {
-    const next = await fetchHealth()
-    setResult(next)
-    return next
-  }, [])
-
   const handleRefresh = useCallback(async () => {
     setRefreshing(true)
-    await runCheck()
+    const next = await fetchHealth()
+    setResult(next)
     setRefreshing(false)
     setRefreshCooldown(true)
     if (refreshCooldownTimerRef.current !== null) {
@@ -50,11 +45,21 @@ export default function HealthStatus() {
       setRefreshCooldown(false)
       refreshCooldownTimerRef.current = null
     }, REFRESH_COOLDOWN_MS)
-  }, [runCheck])
+  }, [])
 
   useEffect(() => {
-    void runCheck()
-  }, [runCheck])
+    let cancelled = false
+
+    void fetchHealth().then((next) => {
+      if (!cancelled) {
+        setResult(next)
+      }
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     return () => {

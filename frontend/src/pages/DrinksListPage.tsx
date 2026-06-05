@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { deleteDrink, fetchDrinks } from '../api/drinks'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -128,7 +128,13 @@ export default function DrinksListPage() {
   )
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebouncedValue(searchInput, 300)
-  const [loading, setLoading] = useState(true)
+  const queryForFetch = useMemo(
+    () => ({ ...catalogQuery, search: debouncedSearch }),
+    [catalogQuery, debouncedSearch],
+  )
+  const fetchKey = `${page}:${JSON.stringify(queryForFetch)}`
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
+  const loading = loadedKey !== fetchKey
   const [error, setError] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -141,14 +147,9 @@ export default function DrinksListPage() {
     async ({
       silent = false,
       page: pageArg = page,
-      query = catalogQuery,
+      query = queryForFetch,
       signal,
     }: LoadDrinksOptions = {}) => {
-      if (!silent) {
-        setLoading(true)
-        setError(null)
-      }
-
       try {
         const result = await fetchDrinks({ ...query, page: pageArg }, signal)
 
@@ -174,32 +175,57 @@ export default function DrinksListPage() {
         if (!silent) {
           setError(e instanceof Error ? e.message : 'Failed to load drinks')
         }
-      } finally {
-        if (!silent) {
-          setLoading(false)
-        }
       }
     },
-    [page, catalogQuery],
+    [page, queryForFetch],
   )
 
-  useEffect(() => {
-    setCatalogQuery((current) => {
-      if (current.search === debouncedSearch) {
-        return current
-      }
-
-      return { ...current, search: debouncedSearch }
-    })
+  function handleSearchInputChange(value: string) {
+    setSearchInput(value)
     setPage(1)
-  }, [debouncedSearch])
+  }
 
   useEffect(() => {
     const controller = new AbortController()
-    void loadDrinks({ page, signal: controller.signal })
+    let cancelled = false
 
-    return () => controller.abort()
-  }, [loadDrinks, page])
+    void fetchDrinks({ ...queryForFetch, page }, controller.signal)
+      .then((result) => {
+        if (cancelled) {
+          return
+        }
+
+        if (
+          result.data.length === 0 &&
+          result.meta.totalPages > 0 &&
+          page > result.meta.totalPages
+        ) {
+          setPage(result.meta.totalPages)
+          return
+        }
+
+        setDrinks(result.data)
+        setMeta(result.meta)
+        setError(null)
+        setLoadedKey(fetchKey)
+      })
+      .catch((e) => {
+        if (cancelled) {
+          return
+        }
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return
+        }
+
+        setError(e instanceof Error ? e.message : 'Failed to load drinks')
+        setLoadedKey(fetchKey)
+      })
+
+    return () => {
+      cancelled = true
+      controller.abort()
+    }
+  }, [fetchKey, page, queryForFetch])
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       void loadDrinks({ silent: true, page })
@@ -269,7 +295,10 @@ export default function DrinksListPage() {
     setPage(1)
   }
 
-  const filtersActive = hasActiveCatalogFilters(catalogQuery)
+  const filtersActive = hasActiveCatalogFilters({
+    ...catalogQuery,
+    search: debouncedSearch,
+  })
   const showEmptyCatalog =
     !loading && !error && meta.total === 0 && !filtersActive
   const showNoMatches =
@@ -299,7 +328,7 @@ export default function DrinksListPage() {
 
       <DrinksCatalogControls
         searchInput={searchInput}
-        onSearchInputChange={setSearchInput}
+        onSearchInputChange={handleSearchInputChange}
         sort={catalogQuery.sort}
         order={catalogQuery.order}
         onSortFieldChange={handleSortFieldChange}
@@ -393,7 +422,7 @@ export default function DrinksListPage() {
         onClose={() => setImportOpen(false)}
         onSuccess={() => {
           setPage(1)
-          void loadDrinks({ silent: true, page: 1, query: catalogQuery })
+          void loadDrinks({ silent: true, page: 1, query: queryForFetch })
         }}
       />
 
@@ -403,7 +432,7 @@ export default function DrinksListPage() {
         onClose={() => setCreateOpen(false)}
         onSuccess={() => {
           setPage(1)
-          void loadDrinks({ silent: true, page: 1, query: catalogQuery })
+          void loadDrinks({ silent: true, page: 1, query: queryForFetch })
         }}
       />
 
@@ -412,7 +441,9 @@ export default function DrinksListPage() {
         open={editingDrink !== null}
         drink={editingDrink ?? undefined}
         onClose={() => setEditingDrink(null)}
-        onSuccess={() => loadDrinks({ silent: true, page, query: catalogQuery })}
+        onSuccess={() =>
+          loadDrinks({ silent: true, page, query: queryForFetch })
+        }
       />
 
       <ConfirmDialog

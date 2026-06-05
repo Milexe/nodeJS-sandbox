@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   activeRangeFilterCount,
   DRINK_SORT_FIELD_OPTIONS,
@@ -159,13 +159,16 @@ export default function DrinksCatalogControls({
   const activeChips = buildActiveFilterChips(appliedFilters)
   const activeFilterCount = activeRangeFilterCount(appliedFilters)
 
-  useEffect(() => {
-    if (filtersOpen) {
-      setDraft(filtersToDraft(appliedFilters))
-      setFiltersTouched(false)
-      setFilterError(null)
-    }
-  }, [appliedFilters, filtersOpen])
+  function handleToggleFilters() {
+    setFiltersOpen((open) => {
+      if (!open) {
+        setDraft(filtersToDraft(appliedFilters))
+        setFiltersTouched(false)
+        setFilterError(null)
+      }
+      return !open
+    })
+  }
 
   function updateDraft(patch: Partial<FilterDraft>) {
     setDraft((current) => ({ ...current, ...patch }))
@@ -238,7 +241,7 @@ export default function DrinksCatalogControls({
             className={`drinks-catalog__filters-btn${filtersOpen ? ' drinks-catalog__filters-btn--open' : ''}`}
             aria-expanded={filtersOpen}
             aria-controls="drinks-catalog-filters"
-            onClick={() => setFiltersOpen((open) => !open)}
+            onClick={handleToggleFilters}
           >
             Filters
             {activeFilterCount > 0 ? (

@@ -21,7 +21,10 @@ import {
 import { PaginatedDrinkList } from './drink-list.types';
 import { buildDrinkOrderBy, buildDrinkWhere } from './drink-list.query';
 import { parseDrinkCsv } from './drink-csv.parser';
-import type { DrinkCsvImportResult, ParsedDrinkCsvRow } from './drink-csv.types';
+import type {
+  DrinkCsvImportResult,
+  ParsedDrinkCsvRow,
+} from './drink-csv.types';
 import {
   DRINKS_CATALOG_FULL_MESSAGE,
   DRINKS_CATALOG_MAX,
@@ -276,7 +279,8 @@ export class DrinkService {
       nextImageUrl = uploadedImageUrl;
     }
 
-    const { removeImage: _removeImage, ...dto } = updateDrinkDto;
+    const dto = { ...updateDrinkDto };
+    delete dto.removeImage;
 
     try {
       return await this.prisma.drink.update({

@@ -87,18 +87,49 @@ export default function DrinkFormModal({
   onClose,
   onSuccess,
 }: DrinkFormModalProps) {
+  if (!open) {
+    return null
+  }
+
+  return (
+    <DrinkFormModalContent
+      key={`${mode}-${drink?.id ?? 'create'}`}
+      mode={mode}
+      drink={drink}
+      onClose={onClose}
+      onSuccess={onSuccess}
+    />
+  )
+}
+
+type DrinkFormModalContentProps = Omit<DrinkFormModalProps, 'open'>
+
+function DrinkFormModalContent({
+  mode,
+  drink,
+  onClose,
+  onSuccess,
+}: DrinkFormModalContentProps) {
   const titleId = useId()
   const overlayPressed = useRef(false)
-  const [form, setForm] = useState(emptyForm)
+  const [form, setForm] = useState(() =>
+    mode === 'edit' && drink ? drinkToFormValues(drink) : emptyForm,
+  )
   const [touched, setTouched] = useState(emptyTouched)
-  const [titleTaken, setTitleTaken] = useState(false)
+  const [titleCheckResult, setTitleCheckResult] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [previewSrc, setPreviewSrc] = useState(DEFAULT_DRINK_IMAGE)
+  const [previewSrc, setPreviewSrc] = useState(() =>
+    mode === 'edit' && drink
+      ? resolveDrinkImageSrc(drink.imageUrl)
+      : DEFAULT_DRINK_IMAGE,
+  )
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [removeImage, setRemoveImage] = useState(false)
   const [imageError, setImageError] = useState<string | null>(null)
   const previewObjectUrl = useRef<string | null>(null)
+
+  const titleTaken = form.title.trim() ? titleCheckResult : false
 
   const titleInvalid = isTitleInvalid(form.title, touched.title, titleTaken)
   const abvInvalid = isAbvInvalid(form.abv, touched.abv)
@@ -106,28 +137,6 @@ export default function DrinkFormModal({
   const priceInvalid = isPriceInvalid(form.price, touched.price)
 
   useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    setForm(mode === 'edit' && drink ? drinkToFormValues(drink) : emptyForm)
-    setTouched(emptyTouched)
-    setTitleTaken(false)
-    setError(null)
-    setSubmitting(false)
-    setImageFile(null)
-    setRemoveImage(false)
-    setImageError(null)
-    if (previewObjectUrl.current) {
-      URL.revokeObjectURL(previewObjectUrl.current)
-      previewObjectUrl.current = null
-    }
-    setPreviewSrc(
-      mode === 'edit' && drink
-        ? resolveDrinkImageSrc(drink.imageUrl)
-        : DEFAULT_DRINK_IMAGE,
-    )
-
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         onClose()
@@ -136,7 +145,7 @@ export default function DrinkFormModal({
 
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose, mode, drink])
+  }, [onClose])
 
   useEffect(() => {
     return () => {
@@ -147,13 +156,8 @@ export default function DrinkFormModal({
   }, [])
 
   useEffect(() => {
-    if (!open) {
-      return
-    }
-
     const title = form.title.trim()
     if (!title) {
-      setTitleTaken(false)
       return
     }
 
@@ -172,18 +176,14 @@ export default function DrinkFormModal({
             item.title === title &&
             (mode === 'create' || item.id !== drink?.id),
         )
-        setTitleTaken(taken)
+        setTitleCheckResult(taken)
       } catch {
-        setTitleTaken(false)
+        setTitleCheckResult(false)
       }
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [form.title, open, mode, drink?.id])
-
-  if (!open) {
-    return null
-  }
+  }, [form.title, mode, drink?.id])
 
   function updateField(field: keyof DrinkFormValues, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -256,7 +256,7 @@ export default function DrinkFormModal({
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to save drink'
       if (message.includes('Title already exists')) {
-        setTitleTaken(true)
+        setTitleCheckResult(true)
       }
       setError(message)
     } finally {

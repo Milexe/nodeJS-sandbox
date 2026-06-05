@@ -10,11 +10,7 @@ export const UPLOADS_DIR = join(process.cwd(), 'uploads');
 
 const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 
-const ALLOWED_MIME_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-]);
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 export function ensureUploadsDir(): void {
   if (!existsSync(UPLOADS_DIR)) {
@@ -63,10 +59,7 @@ function buildFilename(file: Express.Multer.File): string {
   return `${randomUUID()}${safeExt}`;
 }
 
-export function saveDrinkImageBuffer(
-  buffer: Buffer,
-  mimeType: string,
-): string {
+export function saveDrinkImageBuffer(buffer: Buffer, mimeType: string): string {
   if (!ALLOWED_MIME_TYPES.has(mimeType)) {
     throw new BadRequestException('Image must be JPEG, PNG, or WebP');
   }
@@ -110,7 +103,9 @@ export async function downloadDrinkImageFromUrl(url: string): Promise<string> {
     ?.trim();
 
   if (!contentType || !ALLOWED_MIME_TYPES.has(contentType)) {
-    throw new BadRequestException('Image URL must point to JPEG, PNG, or WebP.');
+    throw new BadRequestException(
+      'Image URL must point to JPEG, PNG, or WebP.',
+    );
   }
 
   const buffer = Buffer.from(await response.arrayBuffer());

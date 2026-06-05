@@ -25,8 +25,15 @@ type DrinkCsvImportModalProps = {
   onSuccess: () => void
 }
 
-export default function DrinkCsvImportModal({
-  open,
+export default function DrinkCsvImportModal(props: DrinkCsvImportModalProps) {
+  if (!props.open) {
+    return null
+  }
+
+  return <DrinkCsvImportModalContent {...props} />
+}
+
+function DrinkCsvImportModalContent({
   onClose,
   onSuccess,
 }: DrinkCsvImportModalProps) {
@@ -41,28 +48,12 @@ export default function DrinkCsvImportModal({
   const [exampleOpen, setExampleOpen] = useState(false)
 
   useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    setFile(null)
-    setSubmitting(false)
-    setError(null)
-    setResult(null)
-    setCapacity(null)
-    setCapacityError(null)
-    setExampleOpen(false)
-
     void fetchDrinkCatalogCapacity()
       .then(setCapacity)
       .catch(() => {
         setCapacityError('Could not load catalog capacity.')
       })
-  }, [open])
-
-  if (!open) {
-    return null
-  }
+  }, [])
 
   const catalogTotal = capacity?.total ?? 0
   const remainingSlots = capacity?.remaining ?? 0

@@ -16,37 +16,74 @@ export default function DrinkDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [drink, setDrink] = useState<Drink | null>(null)
-  const [loading, setLoading] = useState(Boolean(id))
+  const [loadedId, setLoadedId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const loading = id !== loadedId
 
-  const loadDrink = useCallback(async () => {
+  const fetchDrink = useCallback(async () => {
     if (!id) {
       return
     }
 
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch(apiUrl(`/drink/${id}`))
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`)
-      }
-      const data: Drink | null = await res.json()
-      setDrink(data)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load drink')
-    } finally {
-      setLoading(false)
+    const res = await fetch(apiUrl(`/drink/${id}`))
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`)
     }
+    return res.json() as Promise<Drink | null>
   }, [id])
 
   useEffect(() => {
-    loadDrink()
-  }, [loadDrink])
+    if (!id) {
+      return
+    }
+
+    let cancelled = false
+
+    void fetchDrink()
+      .then((data) => {
+        if (cancelled) {
+          return
+        }
+        setDrink(data)
+        setError(null)
+        setLoadedId(id)
+      })
+      .catch((e) => {
+        if (cancelled) {
+          return
+        }
+        setError(e instanceof Error ? e.message : 'Failed to load drink')
+        setDrink(null)
+        setLoadedId(id)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [fetchDrink, id])
+
+  function reloadDrink() {
+    if (!id) {
+      return
+    }
+
+    setLoadedId(null)
+    void fetchDrink()
+      .then((data) => {
+        setDrink(data)
+        setError(null)
+        setLoadedId(id)
+      })
+      .catch((e) => {
+        setError(e instanceof Error ? e.message : 'Failed to load drink')
+        setDrink(null)
+        setLoadedId(id)
+      })
+  }
 
   async function handleConfirmDelete() {
     if (!drink) {
@@ -148,7 +185,7 @@ export default function DrinkDetailPage() {
         open={editOpen}
         drink={drink}
         onClose={() => setEditOpen(false)}
-        onSuccess={loadDrink}
+        onSuccess={reloadDrink}
       />
 
       <ConfirmDialog
