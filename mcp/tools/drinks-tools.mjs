@@ -95,12 +95,24 @@ async function assertTitleAvailable(pool, title, excludeId) {
   return result.rowCount === 0;
 }
 
-export function registerDrinkTools(server, pool) {
+export function registerDrinkTools(server, pool, options = {}) {
+  const mode = options.mode === 'readonly' ? 'readonly' : 'readwrite';
+  const scopeLabel =
+    mode === 'readonly' ? 'the connected read-only database' : 'the local application database';
+
+  registerDrinkReadTools(server, pool, scopeLabel);
+
+  if (mode === 'readwrite') {
+    registerDrinkWriteTools(server, pool);
+  }
+}
+
+function registerDrinkReadTools(server, pool, scopeLabel) {
   server.registerTool(
     'list_drinks',
     {
       title: 'List drinks',
-      description: 'List drinks from the local application database.',
+      description: `List drinks from ${scopeLabel}.`,
       inputSchema: {
         limit: z.number().int().min(1).max(MAX_LIMIT).default(DEFAULT_LIMIT),
         minRating: z.number().min(0).max(5).optional(),
@@ -137,7 +149,7 @@ export function registerDrinkTools(server, pool) {
     'get_drink',
     {
       title: 'Get drink',
-      description: 'Get a single drink by id from the local application database.',
+      description: `Get a single drink by id from ${scopeLabel}.`,
       inputSchema: {
         id: z.number().int().positive(),
       },
@@ -157,8 +169,7 @@ export function registerDrinkTools(server, pool) {
     'drinks_stats',
     {
       title: 'Drinks stats',
-      description:
-        'Return aggregate statistics for drinks in the local application database.',
+      description: `Return aggregate statistics for drinks from ${scopeLabel}.`,
       inputSchema: {},
     },
     async () => {
@@ -174,7 +185,9 @@ export function registerDrinkTools(server, pool) {
       return toTextContent(result.rows[0]);
     },
   );
+}
 
+function registerDrinkWriteTools(server, pool) {
   server.registerTool(
     'create_drink',
     {

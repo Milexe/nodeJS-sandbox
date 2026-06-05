@@ -24,8 +24,13 @@
       ],
       "envFile": "${workspaceFolder}/.env"
     },
-    "open-mcp-autobahn": {
-      "url": "https://mcp.open-mcp.org/api/server/autobahn@latest/mcp"
+    "app-live-readonly": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp/app-server.mjs"
+      ],
+      "envFile": "${workspaceFolder}/mcp/env.mcp.live"
     }
   }
 }
