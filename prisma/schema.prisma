@@ -10,10 +10,10 @@ generator client {
 
 model Drink {
   id          Int     @id @default(autoincrement())
-  title       String  @db.VarChar(40)
+  title       String  @unique @db.VarChar(40)
   description String  @db.Text
-  abv         Decimal @db.Decimal(5, 2)
-  rating      Int     @db.SmallInt
+  abv         Decimal @db.Decimal(4, 1)
+  rating      Decimal @db.Decimal(2, 1)
   price       Decimal @db.Decimal(10, 2)
 
   @@map("Drinks")
