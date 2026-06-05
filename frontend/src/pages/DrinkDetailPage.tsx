@@ -7,6 +7,10 @@ import { apiUrl } from '../api'
 import type { Drink } from '../types/drink'
 import { formatDecimal, formatOptionalDecimal } from '../utils/decimalInput'
 import { formatPrice } from '../utils/formatPrice'
+import {
+  handleDrinkImageError,
+  resolveDrinkImageSrc,
+} from '../utils/drinkImage'
 
 export default function DrinkDetailPage() {
   const { id } = useParams()
@@ -120,6 +124,12 @@ export default function DrinkDetailPage() {
       </div>
 
       <article className="drink-detail">
+        <img
+          className="drink-detail__image"
+          src={resolveDrinkImageSrc(drink.imageUrl)}
+          alt=""
+          onError={handleDrinkImageError}
+        />
         <dl>
           <dt>Description</dt>
           <dd>{drink.description || '—'}</dd>

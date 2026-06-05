@@ -52,6 +52,9 @@ src/generated/prisma/
 .temp
 .tmp
 
+# User-uploaded drink images (local API storage)
+/uploads
+
 # Runtime data
 pids
 *.pid

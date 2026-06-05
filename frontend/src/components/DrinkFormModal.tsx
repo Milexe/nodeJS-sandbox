@@ -7,10 +7,10 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react'
+import { saveDrink } from '../api/drinks'
 import { apiUrl } from '../api'
 import type { Drink } from '../types/drink'
 import {
-  buildDrinkPayload,
   drinkToFormValues,
   isAbvInvalid,
   isPriceInvalid,
@@ -20,6 +20,13 @@ import {
   type DrinkFormValues,
 } from '../utils/drinkFormValidation'
 import { PRICE_PREFIX } from '../utils/formatPrice'
+import {
+  DEFAULT_DRINK_IMAGE,
+  DRINK_IMAGE_ACCEPT,
+  handleDrinkImageError,
+  resolveDrinkImageSrc,
+  validateDrinkImageFile,
+} from '../utils/drinkImage'
 
 type DrinkFormModalProps = {
   mode: 'create' | 'edit'
@@ -42,6 +49,17 @@ const emptyTouched = {
   abv: false,
   rating: false,
   price: false,
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"
+      />
+    </svg>
+  )
 }
 
 function FieldLabel({
@@ -76,6 +94,11 @@ export default function DrinkFormModal({
   const [titleTaken, setTitleTaken] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [previewSrc, setPreviewSrc] = useState(DEFAULT_DRINK_IMAGE)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [removeImage, setRemoveImage] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const previewObjectUrl = useRef<string | null>(null)
 
   const titleInvalid = isTitleInvalid(form.title, touched.title, titleTaken)
   const abvInvalid = isAbvInvalid(form.abv, touched.abv)
@@ -92,6 +115,18 @@ export default function DrinkFormModal({
     setTitleTaken(false)
     setError(null)
     setSubmitting(false)
+    setImageFile(null)
+    setRemoveImage(false)
+    setImageError(null)
+    if (previewObjectUrl.current) {
+      URL.revokeObjectURL(previewObjectUrl.current)
+      previewObjectUrl.current = null
+    }
+    setPreviewSrc(
+      mode === 'edit' && drink
+        ? resolveDrinkImageSrc(drink.imageUrl)
+        : DEFAULT_DRINK_IMAGE,
+    )
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -102,6 +137,14 @@ export default function DrinkFormModal({
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [open, onClose, mode, drink])
+
+  useEffect(() => {
+    return () => {
+      if (previewObjectUrl.current) {
+        URL.revokeObjectURL(previewObjectUrl.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!open) {
@@ -147,6 +190,41 @@ export default function DrinkFormModal({
     setTouched((prev) => ({ ...prev, [field]: true }))
   }
 
+  function handleImageChange(file: File | undefined) {
+    if (!file) {
+      return
+    }
+
+    const validationError = validateDrinkImageFile(file)
+    if (validationError) {
+      setImageError(validationError)
+      return
+    }
+
+    if (previewObjectUrl.current) {
+      URL.revokeObjectURL(previewObjectUrl.current)
+    }
+
+    const objectUrl = URL.createObjectURL(file)
+    previewObjectUrl.current = objectUrl
+    setImageFile(file)
+    setRemoveImage(false)
+    setImageError(null)
+    setPreviewSrc(objectUrl)
+  }
+
+  function handleRemoveImage() {
+    if (previewObjectUrl.current) {
+      URL.revokeObjectURL(previewObjectUrl.current)
+      previewObjectUrl.current = null
+    }
+
+    setImageFile(null)
+    setRemoveImage(true)
+    setImageError(null)
+    setPreviewSrc(DEFAULT_DRINK_IMAGE)
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
@@ -158,41 +236,29 @@ export default function DrinkFormModal({
       return
     }
 
+    if (imageError) {
+      setError(imageError)
+      return
+    }
+
     setSubmitting(true)
     try {
-      const url =
-        mode === 'edit' && drink
-          ? apiUrl(`/drink/${drink.id}`)
-          : apiUrl('/drink')
-      const res = await fetch(url, {
-        method: mode === 'edit' ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildDrinkPayload(form, mode)),
+      await saveDrink({
+        mode,
+        form,
+        drinkId: drink?.id,
+        imageFile,
+        removeImage: mode === 'edit' ? removeImage : false,
       })
-
-      if (!res.ok) {
-        const body: unknown = await res.json().catch(() => null)
-        const message =
-          typeof body === 'object' &&
-          body !== null &&
-          'message' in body &&
-          (typeof body.message === 'string' || Array.isArray(body.message))
-            ? Array.isArray(body.message)
-              ? body.message.join(', ')
-              : body.message
-            : `HTTP ${res.status}`
-
-        if (res.status === 409) {
-          setTitleTaken(true)
-        }
-
-        throw new Error(message)
-      }
 
       onSuccess()
       onClose()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save drink')
+      const message = e instanceof Error ? e.message : 'Failed to save drink'
+      if (message.includes('Title already exists')) {
+        setTitleTaken(true)
+      }
+      setError(message)
     } finally {
       setSubmitting(false)
     }
@@ -252,6 +318,59 @@ export default function DrinkFormModal({
               aria-invalid={titleInvalid}
               onChange={(e) => updateField('title', e.target.value)}
             />
+          </div>
+
+          <div className="modal__field modal__image-field">
+            <FieldLabel>Image</FieldLabel>
+            <div className="drink-image-picker">
+              <div className="drink-image-picker__frame">
+                <img
+                  className="drink-image-picker__preview"
+                  src={previewSrc}
+                  alt=""
+                  onError={handleDrinkImageError}
+                />
+              </div>
+              <div className="drink-image-picker__body">
+                <p className="drink-image-picker__lead">Optional cover image</p>
+                <div className="drink-image-picker__actions">
+                  <label className="drink-image-picker__upload">
+                    <UploadIcon />
+                    <span>
+                      {imageFile ||
+                      (mode === 'edit' && drink?.imageUrl && !removeImage)
+                        ? 'Change image'
+                        : 'Upload image'}
+                    </span>
+                    <input
+                      type="file"
+                      accept={DRINK_IMAGE_ACCEPT}
+                      className="drink-image-picker__input"
+                      onChange={(e) => handleImageChange(e.target.files?.[0])}
+                    />
+                  </label>
+                  {imageFile ||
+                  (mode === 'edit' && drink?.imageUrl && !removeImage) ? (
+                    <button
+                      type="button"
+                      className="drink-image-picker__remove"
+                      onClick={handleRemoveImage}
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+                {imageError ? (
+                  <p className="modal__error drink-image-picker__error">
+                    {imageError}
+                  </p>
+                ) : (
+                  <p className="drink-image-picker__hint">
+                    JPEG, PNG, or WebP · up to 2 MB
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="modal__field">

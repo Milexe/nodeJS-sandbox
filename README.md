@@ -12,7 +12,7 @@ Portfolio sandbox for backend patterns, API demos, and full-stack experiments. E
 
 | Demo | Status | Highlights |
 |------|--------|------------|
-| REST API, CORS & Database | **Live** | Drinks CRUD at `/drink`, Prisma, PostgreSQL, DTO validation, CORS; file upload & CSV import planned |
+| REST API, CORS & Database | **Live** | Drinks CRUD at `/drink`, Prisma, PostgreSQL, DTO validation, CORS, images; CSV import planned |
 | Server-side API Proxy | Planned | Nest forwards client requests to external APIs via `/gif` |
 | JWT Authentication & Roles | Planned | Login, refresh tokens, guards, role-based access |
 | WebSockets & Real-time | Planned | Nest WebSocket gateway, rooms, push updates |
@@ -83,6 +83,12 @@ Key variables:
 - `DATABASE_URL` — PostgreSQL connection string
 - `CORS_ORIGIN` — allowed frontend origins (comma-separated)
 - `VITE_API_URL` — API base URL baked into the frontend build
+
+## Drink images
+
+- **Storage:** `./uploads/` on the API host, served at `/uploads/…` (optional JPEG/PNG/WebP, max 2 MB).
+- **Render:** the filesystem is **ephemeral** — uploads are wiped on redeploy; possible broken paths in database.
+- **UI:** missing files show the default shaker instead of a broken image; re-upload to restore.
 
 ## Deployment
 

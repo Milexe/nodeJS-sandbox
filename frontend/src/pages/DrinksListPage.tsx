@@ -8,6 +8,10 @@ import { apiUrl } from '../api'
 import type { Drink } from '../types/drink'
 import { formatDecimal, formatOptionalDecimal } from '../utils/decimalInput'
 import { formatPrice } from '../utils/formatPrice'
+import {
+  handleDrinkImageError,
+  resolveDrinkImageSrc,
+} from '../utils/drinkImage'
 
 const POLL_INTERVAL_MS = 15_000
 
@@ -124,6 +128,7 @@ export default function DrinksListPage() {
         <table className="drinks-table">
           <thead>
             <tr>
+              <th className="drinks-table__col-image" aria-label="Image" />
               <th>Title</th>
               <th>ABV %</th>
               <th>Rating</th>
@@ -138,6 +143,14 @@ export default function DrinksListPage() {
                 className="drinks-row"
                 onClick={() => navigate(`/drinks/${drink.id}`)}
               >
+                <td className="drinks-table__col-image">
+                  <img
+                    className="drinks-table__thumb"
+                    src={resolveDrinkImageSrc(drink.imageUrl)}
+                    alt=""
+                    onError={handleDrinkImageError}
+                  />
+                </td>
                 <td>{drink.title}</td>
                 <td>{formatDecimal(drink.abv, 1)}</td>
                 <td>{formatOptionalDecimal(drink.rating, 1)}</td>

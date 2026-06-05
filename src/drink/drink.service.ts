@@ -9,6 +9,7 @@ import { CreateDrinkDto } from './dto/create-drink.dto';
 import { UpdateDrinkDto } from './dto/update-drink.dto';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { deleteDrinkImage, saveDrinkImage } from './drink-image.storage';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -25,6 +26,14 @@ function isUniqueConstraintError(error: unknown): boolean {
 
 @Injectable()
 export class DrinkService {
+  private imageUrlFromFile(file?: Express.Multer.File): string | undefined {
+    if (!file) {
+      return undefined;
+    }
+
+    return saveDrinkImage(file);
+  }
+
   private async assertTitleAvailable(
     title: string,
     excludeId?: number,
@@ -41,24 +50,29 @@ export class DrinkService {
     }
   }
 
-  private buildCreateData(dto: CreateDrinkDto) {
+  private buildCreateData(dto: CreateDrinkDto, imageUrl?: string) {
     return {
       title: dto.title,
       description: dto.description ?? '',
       abv: dto.abv,
       rating: dto.rating ?? 0,
       price: dto.price,
+      imageUrl: imageUrl ?? null,
     };
   }
 
-  async create(createDrinkDto: CreateDrinkDto) {
+  async create(createDrinkDto: CreateDrinkDto, image?: Express.Multer.File) {
     await this.assertTitleAvailable(createDrinkDto.title);
+    const imageUrl = this.imageUrlFromFile(image);
 
     try {
       return await prisma.drink.create({
-        data: this.buildCreateData(createDrinkDto),
+        data: this.buildCreateData(createDrinkDto, imageUrl),
       });
     } catch (error: unknown) {
+      if (imageUrl) {
+        deleteDrinkImage(imageUrl);
+      }
       if (isUniqueConstraintError(error)) {
         throw new ConflictException('Title already exists');
       }
@@ -83,7 +97,11 @@ export class DrinkService {
     }
   }
 
-  async update(id: number, updateDrinkDto: UpdateDrinkDto) {
+  async update(
+    id: number,
+    updateDrinkDto: UpdateDrinkDto,
+    image?: Express.Multer.File,
+  ) {
     const existing = await prisma.drink.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException(`Drink #${id} not found`);
@@ -92,18 +110,39 @@ export class DrinkService {
     const title = updateDrinkDto.title ?? existing.title;
     await this.assertTitleAvailable(title, id);
 
+    const uploadedImageUrl = this.imageUrlFromFile(image);
+    let nextImageUrl = existing.imageUrl;
+
+    if (updateDrinkDto.removeImage) {
+      deleteDrinkImage(existing.imageUrl);
+      nextImageUrl = null;
+    }
+
+    if (uploadedImageUrl) {
+      if (existing.imageUrl && existing.imageUrl !== uploadedImageUrl) {
+        deleteDrinkImage(existing.imageUrl);
+      }
+      nextImageUrl = uploadedImageUrl;
+    }
+
+    const { removeImage: _removeImage, ...dto } = updateDrinkDto;
+
     try {
       return await prisma.drink.update({
         where: { id },
         data: {
-          title: updateDrinkDto.title ?? existing.title,
-          description: updateDrinkDto.description ?? existing.description,
-          abv: updateDrinkDto.abv ?? existing.abv,
-          rating: updateDrinkDto.rating ?? existing.rating,
-          price: updateDrinkDto.price ?? existing.price,
+          title: dto.title ?? existing.title,
+          description: dto.description ?? existing.description,
+          abv: dto.abv ?? existing.abv,
+          rating: dto.rating ?? existing.rating,
+          price: dto.price ?? existing.price,
+          imageUrl: nextImageUrl,
         },
       });
     } catch (error: unknown) {
+      if (uploadedImageUrl) {
+        deleteDrinkImage(uploadedImageUrl);
+      }
       if (isUniqueConstraintError(error)) {
         throw new ConflictException('Title already exists');
       }
@@ -112,6 +151,11 @@ export class DrinkService {
   }
 
   async remove(id: number) {
+    const existing = await prisma.drink.findUnique({ where: { id } });
+    if (existing?.imageUrl) {
+      deleteDrinkImage(existing.imageUrl);
+    }
+
     await prisma.drink.delete({
       where: { id },
     });
