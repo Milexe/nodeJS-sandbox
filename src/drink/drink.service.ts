@@ -21,7 +21,7 @@ import {
 import { PaginatedDrinkList } from './drink-list.types';
 import { buildDrinkOrderBy, buildDrinkWhere } from './drink-list.query';
 import { parseDrinkCsv } from './drink-csv.parser';
-import type { DrinkCsvImportResult } from './drink-csv.types';
+import type { DrinkCsvImportResult, ParsedDrinkCsvRow } from './drink-csv.types';
 import {
   DRINKS_CATALOG_FULL_MESSAGE,
   DRINKS_CATALOG_MAX,
@@ -87,6 +87,19 @@ export class DrinkService {
     };
   }
 
+  private buildCreateDataFromCsvRow(row: ParsedDrinkCsvRow, imageUrl?: string) {
+    return this.buildCreateData(
+      {
+        title: row.title,
+        description: row.description,
+        abv: row.abv,
+        rating: row.rating,
+        price: row.price,
+      },
+      imageUrl,
+    );
+  }
+
   async create(createDrinkDto: CreateDrinkDto, image?: Express.Multer.File) {
     await this.assertCatalogHasCapacity();
     await this.assertTitleAvailable(createDrinkDto.title);
@@ -130,21 +143,12 @@ export class DrinkService {
       let imageUrl: string | undefined;
 
       try {
-        await this.assertTitleAvailable(row.title);
-
         if (row.imageUrl) {
           imageUrl = await downloadDrinkImageFromUrl(row.imageUrl);
         }
 
         await this.prisma.drink.create({
-          data: {
-            title: row.title,
-            description: row.description ?? '',
-            abv: row.abv,
-            rating: row.rating ?? 0,
-            price: row.price,
-            imageUrl: imageUrl ?? null,
-          },
+          data: this.buildCreateDataFromCsvRow(row, imageUrl),
         });
 
         imported += 1;
@@ -171,6 +175,10 @@ export class DrinkService {
   }
 
   private toImportErrorMessage(error: unknown): string {
+    if (isUniqueConstraintError(error)) {
+      return 'Title already exists.';
+    }
+
     if (error instanceof HttpException) {
       const response = error.getResponse();
       if (typeof response === 'string') {

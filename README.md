@@ -12,16 +12,15 @@ Portfolio sandbox for backend patterns, API demos, and full-stack experiments. E
 
 | Demo | Status | Highlights |
 |------|--------|------------|
-| REST API, CORS & Database | **Live** | Drinks CRUD at `/drink`, Prisma, PostgreSQL, DTO validation, CORS, images; CSV import planned |
+| REST API, CORS & Database | **Live** | Drinks catalog at `/drink` — CRUD, server-side search/sort/filters/pagination, image upload, CSV import, catalog cap (1000), `@nestjs/throttler` |
 | Server-side API Proxy | Planned | Nest forwards client requests to external APIs via `/gif` |
 | JWT Authentication & Roles | Planned | Login, refresh tokens, guards, role-based access |
 | WebSockets & Real-time | Planned | Nest WebSocket gateway, rooms, push updates |
 | OpenAPI & Swagger | Planned | Interactive docs from controllers and DTOs |
-| Health Checks & Rate Limiting | Planned | Liveness/readiness probes, throttling, `429` responses |
 
 ## Stack
 
-- **Backend:** NestJS, TypeScript, Prisma, PostgreSQL, class-validator, JWT (planned)
+- **Backend:** NestJS, TypeScript, Prisma, PostgreSQL, class-validator, `@nestjs/throttler`, JWT (planned)
 - **Frontend:** React, Vite, React Router
 - **Data:** PostgreSQL on Neon (production), Docker Compose (local dev)
 - **Deploy:** Vercel (SPA), Render (API), Neon (database)
@@ -32,6 +31,7 @@ Portfolio sandbox for backend patterns, API demos, and full-stack experiments. E
 src/           NestJS API
 frontend/      React SPA (Vite)
 prisma/        Schema and migrations
+samples/       Committed static assets (CSV import example image)
 mcp/           Local MCP tools for dev (optional)
 ```
 
@@ -82,14 +82,13 @@ Key variables:
 
 - `DATABASE_URL` — PostgreSQL connection string
 - `CORS_ORIGIN` — allowed frontend origins (comma-separated)
-- `VITE_API_URL` — API base URL baked into the frontend build
+- `VITE_API_URL` — API base URL baked into the frontend build at compile time
 
-## Drink images
+## Drinks catalog
 
-- **Storage:** `./uploads/` on the API host, served at `/uploads/…` (optional JPEG/PNG/WebP, max 2 MB).
-- **Render:** the filesystem is **ephemeral** — uploads are wiped on redeploy; possible broken paths in database.
-- **UI:** missing files show the default shaker instead of a broken image; re-upload to restore.
+SPA `/drinks`, API `/drink` — CRUD with multipart images, server-side search/sort/filters/pagination, CSV import (`POST /drink/import`, optional `imageUrl`), 1000-drink cap, and `@nestjs/throttler` on routes.
 
+Images: uploads in `./uploads/` (max 2 MB; ephemeral on Render — redeploy clears files). Sample for CSV at `/samples/csv-import-example.png`. Missing files show a default placeholder in the UI.
 ## Deployment
 
 | Layer | Platform | Role |

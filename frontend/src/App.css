@@ -118,6 +118,186 @@
   white-space: nowrap;
 }
 
+.health-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.health-status:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent-border) 55%, var(--border));
+}
+
+.health-status__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text);
+  opacity: 0.45;
+}
+
+.health-status--ok .health-status__dot {
+  background: #22c55e;
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #22c55e 28%, transparent);
+}
+
+.health-status--error .health-status__dot {
+  background: var(--danger);
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 28%, transparent);
+}
+
+.health-status--loading .health-status__dot {
+  background: #f97316;
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #f97316 28%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .health-status--loading .health-status__dot {
+    animation: health-status-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes health-status-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+      box-shadow: 0 0 0 2px color-mix(in srgb, #f97316 18%, transparent);
+    }
+
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 0 3px color-mix(in srgb, #f97316 38%, transparent);
+    }
+  }
+}
+
+.health-status-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.health-status-dialog__intro {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.health-status-dialog__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--code-bg) 75%, transparent);
+}
+
+.health-status-dialog__fact {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.health-status-dialog__fact-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.health-status-dialog__fact-value {
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.health-status-dialog__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+}
+
+.health-status-dialog__meta {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.health-status-dialog__result {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-h);
+  word-break: break-word;
+}
+
+.health-status-dialog__result code {
+  font-size: 0.82rem;
+}
+
+.health-status-dialog__result--error {
+  border-color: color-mix(in srgb, var(--danger-border) 70%, var(--border));
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.health-status-dialog__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.health-status-dialog__badge--ok {
+  color: #15803d;
+  background: color-mix(in srgb, #22c55e 16%, var(--code-bg));
+}
+
+.health-status-dialog__badge--error {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.health-status-dialog__badge--loading {
+  color: var(--text);
+  background: var(--code-bg);
+}
+
+[data-theme='dark'] .health-status-dialog__badge--ok {
+  color: #86efac;
+}
+
+.modal--health {
+  width: min(100%, 24rem);
+}
+
 .app-header__notice {
   display: flex;
   align-items: flex-start;
@@ -338,7 +518,7 @@
 
 .drinks-page__btn {
   padding: 0.5rem 1rem;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--accent);
   color: var(--on-accent);
@@ -379,98 +559,6 @@
   background: var(--danger);
   color: var(--on-accent);
   filter: none;
-}
-
-.drinks-page__footnote {
-  margin: 1.25rem 0 0;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: var(--text);
-  text-align: center;
-}
-
-.drinks-page__footnote-link {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  font-size: inherit;
-  font-weight: 500;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
-  text-underline-offset: 0.15em;
-  cursor: pointer;
-}
-
-.drinks-page__footnote-link:hover {
-  color: var(--text-h);
-}
-
-.rate-limits-list {
-  margin: 0.85rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.rate-limits-list__item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--code-bg);
-}
-
-.rate-limits-list__label {
-  color: var(--text-h);
-  font-size: 0.9rem;
-}
-
-.rate-limits-list__quota {
-  color: var(--accent);
-  font-size: 0.84rem;
-  font-weight: 500;
-}
-
-.rate-limits-list__detail {
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.rate-limits-list__hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.35rem;
-  margin: 0.25rem 0 0;
-  padding: 0.5rem 0.6rem;
-  border-left: 3px solid var(--accent);
-  border-radius: 0 6px 6px 0;
-  background: color-mix(in srgb, var(--accent-bg) 55%, var(--code-bg));
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.rate-limits-list__hint-label {
-  flex-shrink: 0;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.rate-limits-list__hint-text {
-  margin: 0;
-  color: var(--text);
-}
-
-.rate-limits-list__note {
-  margin: 0.85rem 0 0;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--text);
 }
 
 .modal--info {

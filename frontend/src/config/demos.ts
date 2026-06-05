@@ -11,7 +11,7 @@ export const demos: Demo[] = [
     id: 'drinks',
     title: 'REST API, CORS & Database',
     summary:
-      'Drinks catalog over /drink — Prisma, PostgreSQL on Neon, CORS, file upload, and CSV import',
+      'Drinks catalog — CRUD, search/sort/filters, image upload, CSV import, 1000-drink cap, and request throttling',
     path: '/drinks',
     available: true,
   },
@@ -25,7 +25,8 @@ export const demos: Demo[] = [
   {
     id: 'auth',
     title: 'JWT Authentication & Roles',
-    summary: 'Login, refresh tokens, guards, and role-based access control',
+    summary:
+      'Login, refresh tokens, guards, role-based access, and auth route rate limits',
     path: '/auth',
     available: false,
   },
@@ -41,13 +42,6 @@ export const demos: Demo[] = [
     title: 'OpenAPI & Swagger',
     summary: 'Interactive API docs — schema and try-it-out UI generated from Nest controllers and DTOs',
     path: '/docs',
-    available: false,
-  },
-  {
-    id: 'ops',
-    title: 'Health Checks & Rate Limiting',
-    summary: 'Liveness and readiness probes, dependency status, and request throttling with 429 responses',
-    path: '/ops',
     available: false,
   },
 ]

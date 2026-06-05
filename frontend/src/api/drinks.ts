@@ -67,9 +67,10 @@ export function buildDrinksSearchParams({
 
 export async function fetchDrinks(
   query: FetchDrinksParams,
+  signal?: AbortSignal,
 ): Promise<PaginatedDrinks> {
   const params = buildDrinksSearchParams(query)
-  const res = await fetch(apiUrl(`/drink?${params.toString()}`))
+  const res = await fetch(apiUrl(`/drink?${params.toString()}`), { signal })
 
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}`)

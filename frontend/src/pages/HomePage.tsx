@@ -9,7 +9,7 @@ const PROJECT_TAGLINE = 'NestJS · React · PostgreSQL'
 const techStack = [
   'NestJS & TypeScript on the backend',
   'Prisma ORM with PostgreSQL on Neon (production)',
-  'REST API, DTOs, and class-validator',
+  'REST API, DTOs, class-validator, and @nestjs/throttler',
   'JWT access & refresh tokens, guards, and roles',
   'React, Vite, and React Router on the frontend',
   'CORS tuned for Vercel previews and production',

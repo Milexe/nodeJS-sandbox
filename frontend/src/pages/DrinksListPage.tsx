@@ -6,7 +6,6 @@ import DrinksCatalogControls from '../components/DrinksCatalogControls'
 import DrinkFormModal from '../components/DrinkFormModal'
 import DrinkCsvImportModal from '../components/DrinkCsvImportModal'
 import DrinkTableActions from '../components/DrinkTableActions'
-import RateLimitsFootnote from '../components/RateLimitsFootnote'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type { Drink } from '../types/drink'
 import type { DrinkListMeta } from '../types/drink-list'
@@ -41,6 +40,7 @@ type LoadDrinksOptions = {
   silent?: boolean
   page?: number
   query?: DrinkCatalogQuery
+  signal?: AbortSignal
 }
 
 function ChevronLeftIcon() {
@@ -142,6 +142,7 @@ export default function DrinksListPage() {
       silent = false,
       page: pageArg = page,
       query = catalogQuery,
+      signal,
     }: LoadDrinksOptions = {}) => {
       if (!silent) {
         setLoading(true)
@@ -149,7 +150,7 @@ export default function DrinksListPage() {
       }
 
       try {
-        const result = await fetchDrinks({ ...query, page: pageArg })
+        const result = await fetchDrinks({ ...query, page: pageArg }, signal)
 
         if (
           result.data.length === 0 &&
@@ -166,6 +167,10 @@ export default function DrinksListPage() {
           setError(null)
         }
       } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return
+        }
+
         if (!silent) {
           setError(e instanceof Error ? e.message : 'Failed to load drinks')
         }
@@ -190,7 +195,10 @@ export default function DrinksListPage() {
   }, [debouncedSearch])
 
   useEffect(() => {
-    void loadDrinks({ page })
+    const controller = new AbortController()
+    void loadDrinks({ page, signal: controller.signal })
+
+    return () => controller.abort()
   }, [loadDrinks, page])
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -212,7 +220,8 @@ export default function DrinksListPage() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [loadDrinks, page])
 
-  async function handleConfirmDelete() {    if (!deletingDrink) {
+  async function handleConfirmDelete() {
+    if (!deletingDrink) {
       return
     }
 
@@ -266,7 +275,8 @@ export default function DrinksListPage() {
   const showNoMatches =
     !loading && !error && meta.total === 0 && filtersActive
 
-  return (    <>
+  return (
+    <>
       <div className="drinks-page__toolbar">
         <h2 className="drinks-page__title">Drinks catalog</h2>
         <div className="drinks-page__toolbar-actions">
@@ -378,8 +388,6 @@ export default function DrinksListPage() {
         </>
       ) : null}
 
-      <RateLimitsFootnote />
-
       <DrinkCsvImportModal
         open={importOpen}
         onClose={() => setImportOpen(false)}
@@ -396,14 +404,16 @@ export default function DrinksListPage() {
         onSuccess={() => {
           setPage(1)
           void loadDrinks({ silent: true, page: 1, query: catalogQuery })
-        }}      />
+        }}
+      />
 
       <DrinkFormModal
         mode="edit"
         open={editingDrink !== null}
         drink={editingDrink ?? undefined}
         onClose={() => setEditingDrink(null)}
-        onSuccess={() => loadDrinks({ silent: true, page, query: catalogQuery })}      />
+        onSuccess={() => loadDrinks({ silent: true, page, query: catalogQuery })}
+      />
 
       <ConfirmDialog
         open={deletingDrink !== null}

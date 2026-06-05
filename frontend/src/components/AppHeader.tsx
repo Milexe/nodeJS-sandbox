@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { findActiveDemo } from '../config/demos'
+import HealthStatus from './HealthStatus'
 import ThemeToggle from './ThemeToggle'
 
 const PROJECT_TITLE = 'NodeJS Sandbox'
@@ -46,6 +47,7 @@ export default function AppHeader() {
                 All demos
               </Link>
             ) : null}
+            <HealthStatus />
             <ThemeToggle />
           </div>
         </div>
