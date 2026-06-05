@@ -24,9 +24,9 @@ export default function DrinkDetailPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const loading = id !== loadedId
 
-  const fetchDrink = useCallback(async () => {
+  const fetchDrink = useCallback(async (): Promise<Drink | null> => {
     if (!id) {
-      return
+      throw new Error('Missing drink id')
     }
 
     const res = await fetch(apiUrl(`/drink/${id}`))
