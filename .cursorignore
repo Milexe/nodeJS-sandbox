@@ -1,0 +1,11 @@
+﻿# Keep secrets out of Cursor context (same idea as .gitignore).
+# Reload the window after editing this file.
+
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+.env.mcp.live
+**/.env.mcp.live
+mcp/env.mcp.live

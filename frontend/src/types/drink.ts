@@ -5,4 +5,5 @@ export type Drink = {
   abv: string | number
   rating: number
   price: string | number
+  imageUrl: string | null
 }

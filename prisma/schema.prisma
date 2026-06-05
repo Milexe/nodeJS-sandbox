@@ -10,12 +10,17 @@ generator client {
 
 model Drink {
   id          Int     @id @default(autoincrement())
-  title       String  @db.VarChar(40)
+  title       String  @unique @db.VarChar(40)
   description String  @db.Text
-  abv         Decimal @db.Decimal(5, 2)
-  rating      Int     @db.SmallInt
+  abv         Decimal @db.Decimal(4, 1)
+  rating      Decimal @db.Decimal(2, 1)
   price       Decimal @db.Decimal(10, 2)
+  imageUrl    String? @db.Text
 
+  @@index([abv], map: "Drinks_abv_idx")
+  @@index([rating], map: "Drinks_rating_idx")
+  @@index([price], map: "Drinks_price_idx")
+  @@index([imageUrl], map: "Drinks_imageUrl_idx")
   @@map("Drinks")
 }
 enum Role {

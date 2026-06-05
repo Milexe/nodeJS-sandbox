@@ -41,16 +41,23 @@ src/generated/prisma/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# dotenv environment variable files
+# dotenv environment variable files (keep *.example templates tracked)
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
+!.env.example
+!**/.env.example
+
+# MCP live credentials (local only)
+.env.mcp.live
+**/.env.mcp.live
+mcp/env.mcp.live
 
 # temp directory
 .temp
 .tmp
+
+# User-uploaded drink images (local API storage)
+/uploads
 
 # Runtime data
 pids

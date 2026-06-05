@@ -1,98 +1,109 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NodeJS Sandbox
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**by Roman** · NestJS · React · PostgreSQL
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Portfolio sandbox for backend patterns, API demos, and full-stack experiments. Each demo is a focused slice of the stack — pick one from the UI and explore.
 
-## Description
+**Live app:** [https://node-js-sandbox.vercel.app/](https://node-js-sandbox.vercel.app/)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+> Hosted on free tiers (Vercel, Render, Neon). The first API request after idle may take up to a minute.
 
-## Project setup
+## Demos
 
-```bash
-$ npm install
+| Demo | Status | Highlights |
+|------|--------|------------|
+| REST API, CORS & Database | **Live** | Drinks catalog at `/drink` — CRUD, server-side search/sort/filters/pagination, image upload, CSV import, catalog cap (1000), `@nestjs/throttler` |
+| Server-side API Proxy | Planned | Nest forwards client requests to external APIs via `/gif` |
+| JWT Authentication & Roles | Planned | Login, refresh tokens, guards, role-based access |
+| WebSockets & Real-time | Planned | Nest WebSocket gateway, rooms, push updates |
+| OpenAPI & Swagger | Planned | Interactive docs from controllers and DTOs |
+
+## Stack
+
+- **Backend:** NestJS, TypeScript, Prisma, PostgreSQL, class-validator, `@nestjs/throttler`, JWT (planned)
+- **Frontend:** React, Vite, React Router
+- **Data:** PostgreSQL on Neon (production), Docker Compose (local dev)
+- **Deploy:** Vercel (SPA), Render (API), Neon (database)
+
+## Project structure
+
+```
+src/           NestJS API
+frontend/      React SPA (Vite)
+prisma/        Schema and migrations
+samples/       Committed static assets (CSV import example image)
+mcp/           Local MCP tools for dev (optional)
 ```
 
-## Compile and run the project
+## Quick start
+
+### Prerequisites
+
+- Node.js 20+
+- Docker (for local PostgreSQL)
+
+### API
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+cp .env.example .env
+npm run db:up
+npx prisma migrate deploy
+npm run start:dev
 ```
 
-## Run tests
+API listens on `http://localhost:3000` by default.
+
+### Frontend
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev
 ```
 
+Open `http://localhost:5173`. Set `VITE_API_URL=http://localhost:3000` in `frontend/.env.local`.
+
+### Useful scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run db:up` / `db:down` | Start/stop local Postgres |
+| `npm run prisma:generate` | Regenerate Prisma client |
+| `npm run test` | Unit tests |
+| `npm run test:e2e` | E2E tests |
+
+## Environment
+
+See [`.env.example`](.env.example) (API) and [`frontend/.env.example`](frontend/.env.example) (SPA).
+
+Key variables:
+
+- `DATABASE_URL` — PostgreSQL connection string
+- `CORS_ORIGIN` — allowed frontend origins (comma-separated)
+- `VITE_API_URL` — API base URL baked into the frontend build at compile time
+
+## Drinks catalog
+
+SPA `/drinks`, API `/drink` — CRUD with multipart images, server-side search/sort/filters/pagination, CSV import (`POST /drink/import`, optional `imageUrl`), 1000-drink cap, and `@nestjs/throttler` on routes.
+
+Images: uploads in `./uploads/` (max 2 MB; ephemeral on Render — redeploy clears files). Sample for CSV at `/samples/csv-import-example.png`. Missing files show a default placeholder in the UI.
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Layer | Platform | Role |
+|-------|----------|------|
+| Frontend | [Vercel](https://vercel.com) | React SPA, SPA routing via `vercel.json` rewrites |
+| API | [Render](https://render.com) | NestJS REST API (`/drink`, …) |
+| Database | [Neon](https://neon.tech) | Serverless PostgreSQL |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+**Live frontend:** [https://node-js-sandbox.vercel.app/](https://node-js-sandbox.vercel.app/)
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+**Live API:** [https://nodejs-sandbox-z8j8.onrender.com](https://nodejs-sandbox-z8j8.onrender.com)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Author
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- GitHub: [@Milexe](https://github.com/Milexe)
+- LinkedIn: [Roman Savin](https://www.linkedin.com/in/roman-savin-06b928400/)
+- Telegram: [@Miwexe](https://t.me/Miwexe)
+- Email: milexeuwu@gmail.com

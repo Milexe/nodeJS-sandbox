@@ -1,25 +1,1318 @@
+.app-shell {
+  min-height: 100svh;
+}
+
 .app {
-  max-width: 960px;
+  max-width: var(--content-max);
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem;
+  min-width: 0;
+  overflow-x: clip;
 }
 
-.app-header h1 {
-  margin: 0 0 1rem;
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  margin: 0 0 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.app-header__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.app-header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  min-width: 0;
+}
+
+.app-header__title {
+  font-size: clamp(0.9rem, 2.4vw, 1.02rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
   color: var(--text-h);
-  font-size: 1.75rem;
+  text-decoration: none;
+  transition: color 0.15s ease;
 }
 
-.status {
+.app-header__title:hover {
+  color: var(--accent);
+}
+
+.app-header__title[aria-current='page'] {
+  color: var(--accent);
+}
+
+.app-header__author {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.theme-toggle,
+.app-header__nav-link,
+.social-links__link,
+.drinks-table__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.theme-toggle:hover,
+.app-header__nav-link:hover,
+.social-links__link:hover,
+.drinks-table__icon-btn:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.theme-toggle,
+.social-links__link,
+.drinks-table__icon-btn {
+  width: 2rem;
+  padding: 0;
+}
+
+.app-header__nav-link {
+  width: auto;
+  padding: 0 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.health-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.health-status:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent-border) 55%, var(--border));
+}
+
+.health-status__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text);
+  opacity: 0.45;
+}
+
+.health-status--ok .health-status__dot {
+  background: #22c55e;
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #22c55e 28%, transparent);
+}
+
+.health-status--error .health-status__dot {
+  background: var(--danger);
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 28%, transparent);
+}
+
+.health-status--loading .health-status__dot {
+  background: #f97316;
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #f97316 28%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .health-status--loading .health-status__dot {
+    animation: health-status-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes health-status-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+      box-shadow: 0 0 0 2px color-mix(in srgb, #f97316 18%, transparent);
+    }
+
+    50% {
+      opacity: 1;
+      box-shadow: 0 0 0 3px color-mix(in srgb, #f97316 38%, transparent);
+    }
+  }
+}
+
+.health-status-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.health-status-dialog__intro {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.health-status-dialog__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--code-bg) 75%, transparent);
+}
+
+.health-status-dialog__fact {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.health-status-dialog__fact-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.health-status-dialog__fact-value {
+  min-width: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.health-status-dialog__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+}
+
+.health-status-dialog__meta {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.health-status-dialog__result {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-h);
+  word-break: break-word;
+}
+
+.health-status-dialog__result code {
+  font-size: 0.82rem;
+}
+
+.health-status-dialog__result--error {
+  border-color: color-mix(in srgb, var(--danger-border) 70%, var(--border));
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.health-status-dialog__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.health-status-dialog__badge--ok {
+  color: #15803d;
+  background: color-mix(in srgb, #22c55e 16%, var(--code-bg));
+}
+
+.health-status-dialog__badge--error {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.health-status-dialog__badge--loading {
+  color: var(--text);
+  background: var(--code-bg);
+}
+
+[data-theme='dark'] .health-status-dialog__badge--ok {
+  color: #86efac;
+}
+
+.modal--health {
+  width: min(100%, 24rem);
+}
+
+.app-header__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--code-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.app-header__notice-icon {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  color: var(--accent);
+}
+
+.app-header__notice-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.theme-toggle {
+  flex-shrink: 0;
+}
+
+.theme-toggle svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .theme-toggle--animating svg {
+    transform: rotate(-28deg) scale(0.88);
+  }
+}
+
+@media (max-width: 520px) {
+  .app-header__bar {
+    align-items: flex-start;
+  }
+
+  .app-header__actions {
+    padding-top: 0.1rem;
+  }
+}
+
+.app-main {
+  min-height: 12rem;
+}
+
+.status.error,
+.modal__error {
+  color: var(--danger);
+}
+
+.home__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.home__title-block {
+  flex: 1;
+  min-width: min(100%, 28rem);
+}
+
+.home__title {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.home__by {
+  font-weight: 400;
+  color: var(--text);
+  font-size: 1.35rem;
+}
+
+.home__tagline {
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text);
+}
+
+.home__title-row .social-links {
+  align-self: center;
+}
+
+.home__lead {
+  margin: 0 0 1.75rem;
+  max-width: 42rem;
+}
+
+.home__section {
+  margin-bottom: 2rem;
+}
+
+.home__section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.home__tech-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.social-links__list {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.social-links__link svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.demo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.demo-card {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text-h) 4%, transparent);
+}
+
+.demo-card--active:hover {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.demo-card--soon {
+  opacity: 0.72;
+  cursor: not-allowed;
+  background: var(--code-bg);
+}
+
+.demo-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-h);
+  margin-bottom: 0.25rem;
+}
+
+.demo-card__summary {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.demo-card__badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.drinks-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.drinks-page__title {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--text-h);
+}
+
+.drinks-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.drinks-page__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.drinks-page__btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 32%, transparent);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.drinks-page__btn:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.drinks-page__btn--secondary {
+  background: var(--code-bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.drinks-page__btn--secondary:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+  filter: none;
+  box-shadow: none;
+}
+
+.drinks-page__btn--danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+  box-shadow: none;
+}
+
+.drinks-page__btn--danger:hover {
+  background: var(--danger);
+  color: var(--on-accent);
+  filter: none;
+}
+
+.modal--info {
+  max-width: 28rem;
+}
+
+.modal--import {
+  max-width: 34rem;
+}
+
+.drink-csv-import {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.drink-csv-import__notice {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 45%, var(--border));
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent-bg) 55%, var(--code-bg));
+}
+
+.drink-csv-import__notice strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--text-h);
+  font-size: 0.88rem;
+}
+
+.drink-csv-import__notice p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.drink-csv-import__example-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--code-bg) 70%, transparent);
+  overflow: hidden;
+}
+
+.drink-csv-import__example-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+}
+
+.drink-csv-import__example-toggle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.15rem 0.25rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-h);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drink-csv-import__example-toggle:hover {
+  background: color-mix(in srgb, var(--accent-bg) 45%, transparent);
+}
+
+.drink-csv-import__example-toggle--open .drink-csv-import__example-chevron {
+  transform: rotate(180deg);
+}
+
+.drink-csv-import__example-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.drink-csv-import__example-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.drink-csv-import__example-chevron {
+  margin-left: auto;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.drink-csv-import__example-download {
+  flex-shrink: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-h);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.drink-csv-import__example-download:hover {
+  border-color: color-mix(in srgb, var(--accent-border) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface));
+}
+
+.drink-csv-import__example-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.drink-csv-import__example-body .drink-csv-import__hint {
+  padding-top: 0.65rem;
+}
+
+.drink-csv-import__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.drink-csv-import__label,
+.drink-csv-import__file-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.drink-csv-import__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.drink-csv-import__example {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-h);
+  white-space: pre-wrap;
+}
+
+.drink-csv-import__file {
+  width: 100%;
+  font-size: 0.82rem;
+}
+
+.drink-csv-import__file-name {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.drink-csv-import__result {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+
+.drink-csv-import__result-summary {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-h);
+}
+
+.drink-csv-import__errors {
+  margin: 0.65rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.drinks-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 1rem;
+}
+
+.drinks-catalog__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.drinks-catalog__sort-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.drinks-catalog__actions {
+  display: grid;
+  grid-template-columns: auto 2rem;
+  gap: 0.35rem;
+  align-items: center;
+  min-width: 0;
+}
+
+.drinks-catalog__filters-btn {
+  grid-column: 1;
+  grid-row: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+  height: 2rem;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.drinks-catalog__actions--expanded-filters .drinks-catalog__filters-btn {
+  width: calc(100% + 2rem + 0.35rem);
+}
+
+.drinks-catalog__icon-btn--clear,
+.drinks-catalog__actions-slot {
+  grid-column: 2;
+  grid-row: 1;
+  width: 2rem;
+  height: 2rem;
+}
+
+.drinks-catalog__actions-slot {
+  display: block;
+}
+
+.drinks-catalog__input,
+.drinks-catalog__select {
+  box-sizing: border-box;
+  max-width: 100%;
+  height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.drinks-catalog__input {
+  padding: 0 0.65rem;
+}
+
+.drinks-catalog__input:focus,
+.drinks-catalog__select:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.drinks-catalog__input--invalid {
+  border-color: var(--danger);
+}
+
+.drinks-catalog__input--invalid:focus {
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+.drinks-catalog__input--search {
+  min-width: 0;
+}
+
+.drinks-catalog__input--compact {
+  min-width: 0;
+  width: 100%;
+  height: 1.85rem;
+  padding: 0 0.5rem;
+}
+
+.drinks-catalog input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.drinks-catalog input[type='number']::-webkit-inner-spin-button,
+.drinks-catalog input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
   margin: 0;
 }
 
-.status.error {
-  color: #c53030;
+.drinks-catalog__select {
+  max-width: 11rem;
+  padding: 0 0.65rem;
+  cursor: pointer;
+}
+
+.drinks-catalog__select--sort {
+  min-width: 7.5rem;
+  max-width: 9rem;
+}
+
+.drinks-catalog__filters-btn,
+.drinks-catalog__icon-btn {
+  box-sizing: border-box;
+  height: 2rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.drinks-catalog__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.drinks-catalog__icon-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.drinks-catalog__icon-btn--sort {
+  flex-shrink: 0;
+}
+
+.drinks-catalog__filters-btn--open,
+.drinks-catalog__filters-btn:hover,
+.drinks-catalog__icon-btn:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.drinks-catalog__filters-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.drinks-catalog__active {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.drinks-catalog__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.drinks-catalog__chip:hover {
+  background: color-mix(in srgb, var(--accent) 16%, var(--accent-bg));
+}
+
+.drinks-catalog__panel {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--code-bg);
+}
+
+.drinks-catalog__panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.drinks-catalog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.drinks-catalog__field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.drinks-catalog__field-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.drinks-catalog__field-sep {
+  flex-shrink: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.drinks-catalog__panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.drinks-catalog__panel-error {
+  margin: 0.75rem 0 0;
+  color: var(--danger);
+  font-size: 0.84rem;
+}
+
+.drinks-catalog__panel-btn {
+  padding: 0.45rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.drinks-catalog__panel-btn--ghost {
+  background: transparent;
+  color: var(--text);
+}
+
+.drinks-catalog__panel-btn--ghost:hover {
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.drinks-catalog__panel-btn--apply {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.drinks-catalog__panel-btn--apply:hover {
+  filter: brightness(1.06);
+}
+
+.drinks-table__icon-btn--danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.drinks-table__icon-btn--danger:hover {
+  background: var(--danger);
+  color: var(--on-accent);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--overlay);
+}
+
+.modal {
+  width: min(100%, 28rem);
+  max-height: calc(100svh - 2rem);
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.modal--confirm {
+  width: min(100%, 24rem);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem 0.5rem;
+}
+
+.modal__title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text-h);
+}
+
+.modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal__close:hover {
+  background: var(--code-bg);
+  color: var(--text-h);
+}
+
+.modal__body {
+  padding: 0.25rem 1.1rem 0.5rem;
+}
+
+.modal__message {
+  line-height: 1.5;
+}
+
+.modal__form {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.5rem 1.1rem 1.1rem;
+}
+
+.modal__field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.88rem;
+}
+
+.modal__label {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.modal__label--required::after {
+  content: ' *';
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.modal__field > input,
+.modal__field > textarea,
+.modal__input-prefix input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+.modal__field textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.modal__field > input:focus,
+.modal__field > textarea:focus {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}
+
+.modal__input-prefix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.modal__input-prefix:focus-within {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 1px;
+}
+
+.modal__input-prefix-symbol {
+  padding: 0.5rem 0.55rem 0.5rem 0.65rem;
+  color: var(--text);
+  background: var(--code-bg);
+  border-right: 1px solid var(--border);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.modal__input-prefix input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  border-radius: 0;
+}
+
+.modal input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.modal input[type='number']::-webkit-inner-spin-button,
+.modal input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.modal__field--invalid > input,
+.modal__field--invalid > textarea,
+.modal__input-prefix--invalid {
+  border-color: var(--danger);
+}
+
+.modal__field--invalid > input:focus,
+.modal__field--invalid > textarea:focus,
+.modal__input-prefix--invalid:focus-within {
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+}
+
+.modal__input-prefix--invalid .modal__input-prefix-symbol {
+  border-right-color: var(--danger);
+}
+
+.modal__field-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.modal__actions--footer {
+  padding: 0.75rem 1.1rem 1.1rem;
+  margin-top: 0;
+}
+
+.modal__button {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.modal__button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.modal__button--secondary {
+  background: var(--code-bg);
+  color: var(--text-h);
+}
+
+.modal__button--secondary:hover:not(:disabled) {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.modal__button--primary,
+.modal__button--danger {
+  color: var(--on-accent);
+}
+
+.modal__button--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.modal__button--danger {
+  background: var(--danger);
+  color: var(--on-accent);
+}
+
+.modal__button--primary:hover:not(:disabled),
+.modal__button--danger:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.drinks-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .drinks-table {
   width: 100%;
+  min-width: 32rem;
   border-collapse: collapse;
   font-size: 0.95rem;
 }
@@ -44,9 +1337,256 @@
   background: var(--accent-bg);
 }
 
-.drink-detail h2 {
-  margin: 0 0 1rem;
+.drinks-table__col-actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.drinks-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.drinks-table__icon-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.drinks-table__icon-btn:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.drinks-pagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.drinks-pagination__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+.drinks-pagination__page {
+  font-size: 0.92rem;
+  font-weight: 600;
   color: var(--text-h);
+}
+
+.drinks-pagination__range {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.drinks-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.85rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.drinks-pagination__btn--prev {
+  justify-self: start;
+}
+
+.drinks-pagination__btn--next {
+  justify-self: end;
+}
+
+.drinks-pagination__btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.drinks-pagination__btn:hover:not(:disabled) {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.drinks-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .drinks-pagination {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .drinks-pagination__info {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .drinks-pagination__btn--prev {
+    grid-row: 2;
+    justify-self: stretch;
+    justify-content: center;
+  }
+
+  .drinks-pagination__btn--next {
+    grid-row: 2;
+    justify-self: stretch;
+    justify-content: center;
+  }
+}
+
+.drink-image-picker {
+  display: flex;
+  align-items: stretch;
+  gap: 0.9rem;
+  padding: 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+}
+
+.drink-image-picker__frame {
+  flex-shrink: 0;
+  width: 5.25rem;
+  height: 5.25rem;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px dashed var(--accent-border);
+  background: var(--bg);
+}
+
+.drink-image-picker__preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.drink-image-picker__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.drink-image-picker__lead {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.drink-image-picker__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+}
+
+.drink-image-picker__upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+  padding: 0.42rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--accent) 32%, transparent);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.drink-image-picker__upload:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.drink-image-picker__upload svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.drink-image-picker__remove {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.drink-image-picker__remove:hover {
+  color: var(--danger);
+}
+
+.drink-image-picker__input {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.drink-image-picker__hint {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.drink-image-picker__error {
+  margin: 0;
+}
+
+.drink-detail__image {
+  display: block;
+  width: min(100%, 12rem);
+  height: 12rem;
+  margin: 0 0 1.25rem;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--code-bg);
+}
+
+.drinks-table__col-image {
+  width: 3rem;
+  padding: 0.35rem 0.35rem 0.35rem 0.75rem;
+}
+
+.drinks-table__thumb {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--code-bg);
 }
 
 .drink-detail dl {
@@ -67,4 +1607,51 @@
 
 .drink-detail a {
   color: var(--accent);
+}
+
+@media (max-width: 520px) {
+  .drinks-catalog__row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .drinks-catalog__input--search,
+  .drinks-catalog__sort-group,
+  .drinks-catalog__actions {
+    width: 100%;
+  }
+
+  .drinks-catalog__sort-group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 2rem;
+    gap: 0.35rem;
+  }
+
+  .drinks-catalog__select--sort {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .drinks-catalog__actions {
+    grid-template-columns: minmax(0, 1fr) 2rem;
+  }
+
+  .drinks-catalog__panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal__field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .drink-image-picker {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .drink-image-picker__actions {
+    justify-content: center;
+  }
 }

@@ -6,15 +6,18 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { authThrottle } from '../throttle/throttle.config';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
+  @Throttle(authThrottle)
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: CreateUserDto) {
     const existing = await this.usersService.findByEmail(dto.email);

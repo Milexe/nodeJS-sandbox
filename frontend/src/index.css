@@ -1,4 +1,6 @@
-:root {
+:root,
+[data-theme='light'] {
+  color-scheme: light;
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
@@ -7,17 +9,39 @@
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --danger: #c53030;
+  --danger-border: rgba(197, 48, 48, 0.45);
+  --danger-bg: rgba(197, 48, 48, 0.08);
+  --overlay: rgba(8, 6, 13, 0.45);
+  --on-accent: #fff;
+  --content-max: 960px;
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+}
 
+[data-theme='dark'] {
+  color-scheme: dark;
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --bg: #16171d;
+  --border: #2e303a;
+  --code-bg: #1f2028;
+  --accent: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.15);
+  --accent-border: rgba(192, 132, 252, 0.5);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --on-accent: #fff;
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+}
+
+:root {
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -30,23 +54,41 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  ::view-transition-old(root) {
+    animation-name: theme-dim;
+    z-index: 1;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: theme-reveal;
+    z-index: 2;
+  }
+
+  @keyframes theme-dim {
+    to {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes theme-reveal {
+    from {
+      clip-path: circle(
+        0 at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)
+      );
+    }
+
+    to {
+      clip-path: circle(
+        150vmax at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)
+      );
+    }
   }
 }
 
@@ -85,8 +127,7 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
+code {
   font-family: var(--mono);
   display: inline-flex;
   border-radius: 4px;
