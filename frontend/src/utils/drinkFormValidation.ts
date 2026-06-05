@@ -1,5 +1,11 @@
 import type { Drink } from '../types/drink'
 import type { DrinkRangeFilters } from '../types/drink-query'
+import {
+  DRINK_DESCRIPTION_MAX_LENGTH,
+  DRINK_PRICE_MAX,
+  DRINK_PRICE_MAX_LABEL,
+  DRINK_TITLE_MAX_LENGTH,
+} from '../config/drinkLimits'
 import { formatDecimal, hasAtMostDecimalPlaces } from './decimalInput'
 
 const NUMERIC_PATTERN = /^\d*\.?\d*$/
@@ -69,10 +75,14 @@ export function isTitleInvalid(
   if (!trimmed) {
     return touched
   }
-  if (trimmed.length > 40) {
+  if (trimmed.length > DRINK_TITLE_MAX_LENGTH) {
     return true
   }
   return titleTaken
+}
+
+export function isDescriptionInvalid(value: string, touched: boolean): boolean {
+  return touched && value.length > DRINK_DESCRIPTION_MAX_LENGTH
 }
 
 export function isAbvInvalid(value: string, touched: boolean): boolean {
@@ -105,6 +115,7 @@ export function isPriceInvalid(value: string, touched: boolean): boolean {
     required: true,
     touched,
     min: 0,
+    max: DRINK_PRICE_MAX,
     maxDecimalPlaces: 2,
   })
 }
@@ -294,12 +305,16 @@ export function validateDrinkForm(
     return 'Title is required.'
   }
 
-  if (title.length > 40) {
-    return 'Title must be 40 characters or fewer.'
+  if (title.length > DRINK_TITLE_MAX_LENGTH) {
+    return `Title must be ${DRINK_TITLE_MAX_LENGTH} characters or fewer.`
   }
 
   if (titleTaken) {
     return 'Title already exists.'
+  }
+
+  if (form.description.length > DRINK_DESCRIPTION_MAX_LENGTH) {
+    return `Description must be ${DRINK_DESCRIPTION_MAX_LENGTH} characters or fewer.`
   }
 
   if (isAbvInvalid(form.abv, true)) {
@@ -319,7 +334,7 @@ export function validateDrinkForm(
     if (!hasAtMostDecimalPlaces(form.price, 2)) {
       return 'Price allows at most 2 decimal places.'
     }
-    return 'Price must be 0 or greater.'
+    return `Price must be between 0 and ${DRINK_PRICE_MAX_LABEL}.`
   }
 
   if (isRatingInvalid(form.rating, true)) {

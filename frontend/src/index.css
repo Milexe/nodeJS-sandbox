@@ -90,6 +90,23 @@
       );
     }
   }
+
+  .theme-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    clip-path: circle(
+      0 at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)
+    );
+    transition: clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .theme-transition-overlay--active {
+    clip-path: circle(
+      150vmax at var(--theme-transition-x, 50vw) var(--theme-transition-y, 50vh)
+    );
+  }
 }
 
 #root {

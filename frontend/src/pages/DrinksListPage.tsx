@@ -359,13 +359,21 @@ export default function DrinksListPage() {
         <>
           <div className="drinks-table-scroll">
             <table className="drinks-table">
+            <colgroup>
+              <col className="drinks-table__col-image" />
+              <col className="drinks-table__col-title" />
+              <col className="drinks-table__col-abv" />
+              <col className="drinks-table__col-rating" />
+              <col className="drinks-table__col-price" />
+              <col className="drinks-table__col-actions" />
+            </colgroup>
             <thead>
               <tr>
                 <th className="drinks-table__col-image" aria-label="Image" />
-                <th>Title</th>
-                <th>ABV %</th>
-                <th>Rating</th>
-                <th>Price</th>
+                <th className="drinks-table__col-title">Title</th>
+                <th className="drinks-table__col-abv">ABV %</th>
+                <th className="drinks-table__col-rating">Rating</th>
+                <th className="drinks-table__col-price">Price</th>
                 <th className="drinks-table__col-actions">Actions</th>
               </tr>
             </thead>
@@ -384,23 +392,27 @@ export default function DrinksListPage() {
                       onError={handleDrinkImageError}
                     />
                   </td>
-                  <td>{drink.title}</td>
-                  <td>{formatDecimal(drink.abv, 1)}</td>
-                  <td>{formatOptionalDecimal(drink.rating, 1)}</td>
-                  <td>{formatPrice(drink.price)}</td>
+                  <td className="drinks-table__col-title">{drink.title}</td>
+                  <td className="drinks-table__col-abv">
+                    {formatDecimal(drink.abv, 1)}
+                  </td>
+                  <td className="drinks-table__col-rating">
+                    {formatOptionalDecimal(drink.rating, 1)}
+                  </td>
+                  <td className="drinks-table__col-price">
+                    {formatPrice(drink.price)}
+                  </td>
                   <td
                     className="drinks-table__col-actions"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    <div className="drinks-table__actions">
-                      <DrinkTableActions
-                        onEdit={() => setEditingDrink(drink)}
-                        onDelete={() => {
-                          setDeleteError(null)
-                          setDeletingDrink(drink)
-                        }}
-                      />
-                    </div>
+                    <DrinkTableActions
+                      onEdit={() => setEditingDrink(drink)}
+                      onDelete={() => {
+                        setDeleteError(null)
+                        setDeletingDrink(drink)
+                      }}
+                    />
                   </td>
                 </tr>
               ))}

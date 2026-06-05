@@ -30,7 +30,7 @@ export default function DrinkTableActions({
   onDelete,
 }: DrinkTableActionsProps) {
   return (
-    <>
+    <div className="drinks-table__actions">
       <button
         type="button"
         className="drinks-table__icon-btn"
@@ -47,6 +47,6 @@ export default function DrinkTableActions({
       >
         <DeleteIcon />
       </button>
-    </>
+    </div>
   )
 }

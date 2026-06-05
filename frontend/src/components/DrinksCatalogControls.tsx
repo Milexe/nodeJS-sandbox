@@ -204,38 +204,36 @@ export default function DrinksCatalogControls({
           onChange={(event) => onSearchInputChange(event.target.value)}
         />
 
-        <div className="drinks-catalog__sort-group">
-          <select
-            className="drinks-catalog__select drinks-catalog__select--sort"
-            value={sort}
-            aria-label="Sort by"
-            onChange={(event) =>
-              onSortFieldChange(event.target.value as DrinkSortField)
-            }
-          >
-            {DRINK_SORT_FIELD_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            className="drinks-catalog__icon-btn drinks-catalog__icon-btn--sort"
-            aria-label={
-              order === 'asc'
-                ? 'Sorted ascending. Switch to descending.'
-                : 'Sorted descending. Switch to ascending.'
-            }
-            onClick={() => onSortOrderChange(toggleSortOrder(order))}
-          >
-            {order === 'asc' ? <SortAscIcon /> : <SortDescIcon />}
-          </button>
-        </div>
+        <div className="drinks-catalog__toolbar">
+          <div className="drinks-catalog__sort-group">
+            <select
+              className="drinks-catalog__select drinks-catalog__select--sort"
+              value={sort}
+              aria-label="Sort by"
+              onChange={(event) =>
+                onSortFieldChange(event.target.value as DrinkSortField)
+              }
+            >
+              {DRINK_SORT_FIELD_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="drinks-catalog__icon-btn drinks-catalog__icon-btn--sort"
+              aria-label={
+                order === 'asc'
+                  ? 'Sorted ascending. Switch to descending.'
+                  : 'Sorted descending. Switch to ascending.'
+              }
+              onClick={() => onSortOrderChange(toggleSortOrder(order))}
+            >
+              {order === 'asc' ? <SortAscIcon /> : <SortDescIcon />}
+            </button>
+          </div>
 
-        <div
-          className={`drinks-catalog__actions${canClear ? '' : ' drinks-catalog__actions--expanded-filters'}`}
-        >
           <button
             type="button"
             className={`drinks-catalog__filters-btn${filtersOpen ? ' drinks-catalog__filters-btn--open' : ''}`}
@@ -260,12 +258,7 @@ export default function DrinksCatalogControls({
             >
               <ClearIcon />
             </button>
-          ) : (
-            <span
-              className="drinks-catalog__actions-slot"
-              aria-hidden="true"
-            />
-          )}
+          ) : null}
         </div>
       </div>
 

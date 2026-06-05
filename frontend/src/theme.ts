@@ -8,6 +8,11 @@ export type ThemeTransitionOrigin = {
   y: number
 }
 
+const THEME_SURFACE: Record<Theme, string> = {
+  light: '#fff',
+  dark: '#16171d',
+}
+
 export function getSystemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
     ? 'dark'
@@ -37,17 +42,39 @@ function setTransitionOrigin(origin: ThemeTransitionOrigin): void {
   root.style.setProperty('--theme-transition-y', `${origin.y}px`)
 }
 
-function startThemeTransition(update: () => void): void {
+function startViewTransition(update: () => void): boolean {
   const doc = document as Document & {
     startViewTransition?: (callback: () => void) => { finished: Promise<void> }
   }
 
-  if (doc.startViewTransition) {
-    doc.startViewTransition(update)
-    return
+  if (!doc.startViewTransition) {
+    return false
   }
 
-  update()
+  doc.startViewTransition(update)
+  return true
+}
+
+function runCircleRevealFallback(
+  theme: Theme,
+  update: () => void,
+): void {
+  const overlay = document.createElement('div')
+  overlay.className = 'theme-transition-overlay'
+  overlay.style.background = THEME_SURFACE[theme]
+  document.body.appendChild(overlay)
+
+  const finish = () => {
+    update()
+    overlay.remove()
+  }
+
+  requestAnimationFrame(() => {
+    overlay.classList.add('theme-transition-overlay--active')
+  })
+
+  overlay.addEventListener('transitionend', finish, { once: true })
+  window.setTimeout(finish, THEME_TRANSITION_MS + 100)
 }
 
 export function applyThemeWithTransition(
@@ -62,7 +89,12 @@ export function applyThemeWithTransition(
   }
 
   setTransitionOrigin(origin)
-  startThemeTransition(update)
+
+  if (startViewTransition(update)) {
+    return
+  }
+
+  runCircleRevealFallback(theme, update)
 }
 
 export function initTheme(): Theme {
