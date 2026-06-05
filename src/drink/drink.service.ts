@@ -10,6 +10,13 @@ import { UpdateDrinkDto } from './dto/update-drink.dto';
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { deleteDrinkImage, saveDrinkImage } from './drink-image.storage';
+import {
+  DRINKS_DEFAULT_LIMIT,
+  DRINKS_DEFAULT_PAGE,
+  FindDrinksQueryDto,
+} from './dto/find-drinks-query.dto';
+import { PaginatedDrinkList } from './drink-list.types';
+import { buildDrinkOrderBy, buildDrinkWhere } from './drink-list.query';
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -80,10 +87,28 @@ export class DrinkService {
     }
   }
 
-  async findAll(title?: string) {
-    return prisma.drink.findMany({
-      where: title ? { title } : undefined,
-    });
+  async findAll(query: FindDrinksQueryDto = {}): Promise<PaginatedDrinkList> {
+    const page = query.page ?? DRINKS_DEFAULT_PAGE;
+    const limit = query.limit ?? DRINKS_DEFAULT_LIMIT;
+    const where = buildDrinkWhere(query);
+    const orderBy = buildDrinkOrderBy(query.sort, query.order);
+
+    const [data, total] = await Promise.all([
+      prisma.drink.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy,
+      }),
+      prisma.drink.count({ where }),
+    ]);
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: { page, limit, total, totalPages },
+    };
   }
 
   async findOne(id: string) {

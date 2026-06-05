@@ -1,4 +1,5 @@
 import type { Drink } from '../types/drink'
+import type { DrinkRangeFilters } from '../types/drink-query'
 import { formatDecimal, hasAtMostDecimalPlaces } from './decimalInput'
 
 const NUMERIC_PATTERN = /^\d*\.?\d*$/
@@ -106,6 +107,181 @@ export function isPriceInvalid(value: string, touched: boolean): boolean {
     min: 0,
     maxDecimalPlaces: 2,
   })
+}
+
+const FILTER_ABV_RULE = {
+  min: 0,
+  max: 100,
+  maxDecimalPlaces: 1,
+} as const
+
+const FILTER_RATING_RULE = {
+  min: 0,
+  max: 5,
+  maxDecimalPlaces: 1,
+} as const
+
+const FILTER_PRICE_RULE = {
+  min: 0,
+  maxDecimalPlaces: 2,
+} as const
+
+type OptionalNumericRule = {
+  min: number
+  max?: number
+  maxDecimalPlaces: number
+}
+
+function isOptionalNumericInvalid(
+  value: string,
+  rule: OptionalNumericRule,
+): boolean {
+  return isNumericFieldInvalid(value, {
+    required: false,
+    touched: true,
+    min: rule.min,
+    max: rule.max,
+    maxDecimalPlaces: rule.maxDecimalPlaces,
+  })
+}
+
+export function isOptionalAbvFilterInvalid(value: string): boolean {
+  return isOptionalNumericInvalid(value, FILTER_ABV_RULE)
+}
+
+export function isOptionalRatingFilterInvalid(value: string): boolean {
+  return isOptionalNumericInvalid(value, FILTER_RATING_RULE)
+}
+
+export function isOptionalPriceFilterInvalid(value: string): boolean {
+  return isOptionalNumericInvalid(value, FILTER_PRICE_RULE)
+}
+
+export type FilterDraftValues = {
+  minAbv: string
+  maxAbv: string
+  minRating: string
+  maxRating: string
+  minPrice: string
+  maxPrice: string
+}
+
+function optionalFilterFieldError(
+  label: string,
+  value: string,
+  maxDecimalPlaces: number,
+  rangeMessage: string,
+): string | null {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return null
+  }
+
+  if (!hasAtMostDecimalPlaces(trimmed, maxDecimalPlaces)) {
+    const placeLabel = maxDecimalPlaces === 1 ? 'place' : 'places'
+    return `${label} allows at most ${maxDecimalPlaces} decimal ${placeLabel}.`
+  }
+
+  return `${label} must be ${rangeMessage}.`
+}
+
+export function validateFilterDraft(draft: FilterDraftValues): string | null {
+  if (isOptionalAbvFilterInvalid(draft.minAbv)) {
+    return (
+      optionalFilterFieldError(
+        'Minimum ABV',
+        draft.minAbv,
+        1,
+        'between 0 and 100',
+      ) ?? 'Minimum ABV must be between 0 and 100.'
+    )
+  }
+
+  if (isOptionalAbvFilterInvalid(draft.maxAbv)) {
+    return (
+      optionalFilterFieldError(
+        'Maximum ABV',
+        draft.maxAbv,
+        1,
+        'between 0 and 100',
+      ) ?? 'Maximum ABV must be between 0 and 100.'
+    )
+  }
+
+  if (isOptionalRatingFilterInvalid(draft.minRating)) {
+    return (
+      optionalFilterFieldError(
+        'Minimum rating',
+        draft.minRating,
+        1,
+        'between 0 and 5',
+      ) ?? 'Minimum rating must be between 0 and 5.'
+    )
+  }
+
+  if (isOptionalRatingFilterInvalid(draft.maxRating)) {
+    return (
+      optionalFilterFieldError(
+        'Maximum rating',
+        draft.maxRating,
+        1,
+        'between 0 and 5',
+      ) ?? 'Maximum rating must be between 0 and 5.'
+    )
+  }
+
+  if (isOptionalPriceFilterInvalid(draft.minPrice)) {
+    return (
+      optionalFilterFieldError(
+        'Minimum price',
+        draft.minPrice,
+        2,
+        '0 or greater',
+      ) ?? 'Minimum price must be 0 or greater.'
+    )
+  }
+
+  if (isOptionalPriceFilterInvalid(draft.maxPrice)) {
+    return (
+      optionalFilterFieldError(
+        'Maximum price',
+        draft.maxPrice,
+        2,
+        '0 or greater',
+      ) ?? 'Maximum price must be 0 or greater.'
+    )
+  }
+
+  return null
+}
+
+export function parseOptionalFilterNumber(
+  value: string,
+  rule: OptionalNumericRule,
+): number | undefined {
+  const trimmed = value.trim()
+  if (!trimmed || isOptionalNumericInvalid(value, rule)) {
+    return undefined
+  }
+
+  if (isIncompleteNumber(trimmed)) {
+    return undefined
+  }
+
+  return Number(trimmed)
+}
+
+export function filterDraftToRangeFilters(
+  draft: FilterDraftValues,
+): DrinkRangeFilters {
+  return {
+    minAbv: parseOptionalFilterNumber(draft.minAbv, FILTER_ABV_RULE),
+    maxAbv: parseOptionalFilterNumber(draft.maxAbv, FILTER_ABV_RULE),
+    minRating: parseOptionalFilterNumber(draft.minRating, FILTER_RATING_RULE),
+    maxRating: parseOptionalFilterNumber(draft.maxRating, FILTER_RATING_RULE),
+    minPrice: parseOptionalFilterNumber(draft.minPrice, FILTER_PRICE_RULE),
+    maxPrice: parseOptionalFilterNumber(draft.maxPrice, FILTER_PRICE_RULE),
+  }
 }
 
 export function validateDrinkForm(
