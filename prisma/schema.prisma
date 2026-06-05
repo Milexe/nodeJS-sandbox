@@ -17,6 +17,10 @@ model Drink {
   price       Decimal @db.Decimal(10, 2)
   imageUrl    String? @db.Text
 
+  @@index([abv], map: "Drinks_abv_idx")
+  @@index([rating], map: "Drinks_rating_idx")
+  @@index([price], map: "Drinks_price_idx")
+  @@index([imageUrl], map: "Drinks_imageUrl_idx")
   @@map("Drinks")
 }
 enum Role {

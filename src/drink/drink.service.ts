@@ -7,8 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateDrinkDto } from './dto/create-drink.dto';
 import { UpdateDrinkDto } from './dto/update-drink.dto';
-import { PrismaClient } from '../generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaService } from '../prisma/prisma.service';
 import { deleteDrinkImage, saveDrinkImage } from './drink-image.storage';
 import {
   DRINKS_DEFAULT_LIMIT,
@@ -17,10 +16,10 @@ import {
 } from './dto/find-drinks-query.dto';
 import { PaginatedDrinkList } from './drink-list.types';
 import { buildDrinkOrderBy, buildDrinkWhere } from './drink-list.query';
-
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-});
+import {
+  DRINKS_CATALOG_FULL_MESSAGE,
+  DRINKS_CATALOG_MAX,
+} from './drink.constants';
 
 function isUniqueConstraintError(error: unknown): boolean {
   return (
@@ -33,6 +32,8 @@ function isUniqueConstraintError(error: unknown): boolean {
 
 @Injectable()
 export class DrinkService {
+  constructor(private readonly prisma: PrismaService) {}
+
   private imageUrlFromFile(file?: Express.Multer.File): string | undefined {
     if (!file) {
       return undefined;
@@ -41,11 +42,22 @@ export class DrinkService {
     return saveDrinkImage(file);
   }
 
+  private async assertCatalogHasCapacity(addCount = 1): Promise<void> {
+    if (addCount <= 0) {
+      return;
+    }
+
+    const currentCount = await this.prisma.drink.count();
+    if (currentCount + addCount > DRINKS_CATALOG_MAX) {
+      throw new ConflictException(DRINKS_CATALOG_FULL_MESSAGE);
+    }
+  }
+
   private async assertTitleAvailable(
     title: string,
     excludeId?: number,
   ): Promise<void> {
-    const existing = await prisma.drink.findFirst({
+    const existing = await this.prisma.drink.findFirst({
       where: {
         title,
         ...(excludeId !== undefined ? { NOT: { id: excludeId } } : {}),
@@ -69,11 +81,12 @@ export class DrinkService {
   }
 
   async create(createDrinkDto: CreateDrinkDto, image?: Express.Multer.File) {
+    await this.assertCatalogHasCapacity();
     await this.assertTitleAvailable(createDrinkDto.title);
     const imageUrl = this.imageUrlFromFile(image);
 
     try {
-      return await prisma.drink.create({
+      return await this.prisma.drink.create({
         data: this.buildCreateData(createDrinkDto, imageUrl),
       });
     } catch (error: unknown) {
@@ -94,13 +107,13 @@ export class DrinkService {
     const orderBy = buildDrinkOrderBy(query.sort, query.order);
 
     const [data, total] = await Promise.all([
-      prisma.drink.findMany({
+      this.prisma.drink.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy,
       }),
-      prisma.drink.count({ where }),
+      this.prisma.drink.count({ where }),
     ]);
 
     const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
@@ -113,7 +126,7 @@ export class DrinkService {
 
   async findOne(id: string) {
     try {
-      return await prisma.drink.findUnique({
+      return await this.prisma.drink.findUnique({
         where: { id: parseInt(id, 10) },
       });
     } catch (error) {
@@ -127,7 +140,7 @@ export class DrinkService {
     updateDrinkDto: UpdateDrinkDto,
     image?: Express.Multer.File,
   ) {
-    const existing = await prisma.drink.findUnique({ where: { id } });
+    const existing = await this.prisma.drink.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException(`Drink #${id} not found`);
     }
@@ -153,7 +166,7 @@ export class DrinkService {
     const { removeImage: _removeImage, ...dto } = updateDrinkDto;
 
     try {
-      return await prisma.drink.update({
+      return await this.prisma.drink.update({
         where: { id },
         data: {
           title: dto.title ?? existing.title,
@@ -176,12 +189,12 @@ export class DrinkService {
   }
 
   async remove(id: number) {
-    const existing = await prisma.drink.findUnique({ where: { id } });
+    const existing = await this.prisma.drink.findUnique({ where: { id } });
     if (existing?.imageUrl) {
       deleteDrinkImage(existing.imageUrl);
     }
 
-    await prisma.drink.delete({
+    await this.prisma.drink.delete({
       where: { id },
     });
     return `This action removes a #${id} drink`;

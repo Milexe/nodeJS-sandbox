@@ -10,6 +10,7 @@ async function bootstrap() {
   ensureUploadsDir();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useStaticAssets(UPLOADS_DIR, { prefix: '/uploads' });
+  app.set('trust proxy', 1);
   app.enableCors({
     origin: createCorsOriginValidator(),
     credentials: true,
