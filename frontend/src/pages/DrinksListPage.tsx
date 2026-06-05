@@ -6,6 +6,7 @@ import DrinksCatalogControls from '../components/DrinksCatalogControls'
 import DrinkFormModal from '../components/DrinkFormModal'
 import DrinkCsvImportModal from '../components/DrinkCsvImportModal'
 import DrinkTableActions from '../components/DrinkTableActions'
+import RateLimitsFootnote from '../components/RateLimitsFootnote'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type { Drink } from '../types/drink'
 import type { DrinkListMeta } from '../types/drink-list'
@@ -416,6 +417,8 @@ export default function DrinksListPage() {
           ) : null}
         </>
       ) : null}
+
+      <RateLimitsFootnote />
 
       <DrinkCsvImportModal
         open={importOpen}
