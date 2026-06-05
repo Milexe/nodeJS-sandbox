@@ -330,6 +330,12 @@
   gap: 0.5rem;
 }
 
+.drinks-page__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .drinks-page__btn {
   padding: 0.5rem 1rem;
   border: none;
@@ -347,6 +353,20 @@
 .drinks-page__btn:hover {
   filter: brightness(1.06);
   box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.drinks-page__btn--secondary {
+  background: var(--code-bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.drinks-page__btn--secondary:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+  filter: none;
+  box-shadow: none;
 }
 
 .drinks-page__btn--danger {
@@ -455,6 +475,192 @@
 
 .modal--info {
   max-width: 28rem;
+}
+
+.modal--import {
+  max-width: 34rem;
+}
+
+.drink-csv-import {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.drink-csv-import__notice {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 45%, var(--border));
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent-bg) 55%, var(--code-bg));
+}
+
+.drink-csv-import__notice strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--text-h);
+  font-size: 0.88rem;
+}
+
+.drink-csv-import__notice p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.drink-csv-import__example-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--code-bg) 70%, transparent);
+  overflow: hidden;
+}
+
+.drink-csv-import__example-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+}
+
+.drink-csv-import__example-toggle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.15rem 0.25rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-h);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drink-csv-import__example-toggle:hover {
+  background: color-mix(in srgb, var(--accent-bg) 45%, transparent);
+}
+
+.drink-csv-import__example-toggle--open .drink-csv-import__example-chevron {
+  transform: rotate(180deg);
+}
+
+.drink-csv-import__example-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.drink-csv-import__example-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.drink-csv-import__example-chevron {
+  margin-left: auto;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.drink-csv-import__example-download {
+  flex-shrink: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-h);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.drink-csv-import__example-download:hover {
+  border-color: color-mix(in srgb, var(--accent-border) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent-bg) 35%, var(--surface));
+}
+
+.drink-csv-import__example-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.drink-csv-import__example-body .drink-csv-import__hint {
+  padding-top: 0.65rem;
+}
+
+.drink-csv-import__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.drink-csv-import__label,
+.drink-csv-import__file-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.drink-csv-import__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.drink-csv-import__example {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-h);
+  white-space: pre-wrap;
+}
+
+.drink-csv-import__file {
+  width: 100%;
+  font-size: 0.82rem;
+}
+
+.drink-csv-import__file-name {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.drink-csv-import__result {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+
+.drink-csv-import__result-summary {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-h);
+}
+
+.drink-csv-import__errors {
+  margin: 0.65rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text);
 }
 
 .drinks-catalog {

@@ -4,6 +4,7 @@ import { deleteDrink, fetchDrinks } from '../api/drinks'
 import ConfirmDialog from '../components/ConfirmDialog'
 import DrinksCatalogControls from '../components/DrinksCatalogControls'
 import DrinkFormModal from '../components/DrinkFormModal'
+import DrinkCsvImportModal from '../components/DrinkCsvImportModal'
 import DrinkTableActions from '../components/DrinkTableActions'
 import RateLimitsFootnote from '../components/RateLimitsFootnote'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
@@ -130,6 +131,7 @@ export default function DrinksListPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [editingDrink, setEditingDrink] = useState<Drink | null>(null)
   const [deletingDrink, setDeletingDrink] = useState<Drink | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -267,13 +269,22 @@ export default function DrinksListPage() {
   return (    <>
       <div className="drinks-page__toolbar">
         <h2 className="drinks-page__title">Drinks catalog</h2>
-        <button
-          type="button"
-          className="drinks-page__btn"
-          onClick={() => setCreateOpen(true)}
-        >
-          Add drink
-        </button>
+        <div className="drinks-page__toolbar-actions">
+          <button
+            type="button"
+            className="drinks-page__btn drinks-page__btn--secondary"
+            onClick={() => setImportOpen(true)}
+          >
+            Import CSV
+          </button>
+          <button
+            type="button"
+            className="drinks-page__btn"
+            onClick={() => setCreateOpen(true)}
+          >
+            Add drink
+          </button>
+        </div>
       </div>
 
       <DrinksCatalogControls
@@ -368,6 +379,15 @@ export default function DrinksListPage() {
       ) : null}
 
       <RateLimitsFootnote />
+
+      <DrinkCsvImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onSuccess={() => {
+          setPage(1)
+          void loadDrinks({ silent: true, page: 1, query: catalogQuery })
+        }}
+      />
 
       <DrinkFormModal
         mode="create"

@@ -8,7 +8,11 @@ import {
 import { CreateDrinkDto } from './dto/create-drink.dto';
 import { UpdateDrinkDto } from './dto/update-drink.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { deleteDrinkImage, saveDrinkImage } from './drink-image.storage';
+import {
+  deleteDrinkImage,
+  downloadDrinkImageFromUrl,
+  saveDrinkImage,
+} from './drink-image.storage';
 import {
   DRINKS_DEFAULT_LIMIT,
   DRINKS_DEFAULT_PAGE,
@@ -16,9 +20,12 @@ import {
 } from './dto/find-drinks-query.dto';
 import { PaginatedDrinkList } from './drink-list.types';
 import { buildDrinkOrderBy, buildDrinkWhere } from './drink-list.query';
+import { parseDrinkCsv } from './drink-csv.parser';
+import type { DrinkCsvImportResult } from './drink-csv.types';
 import {
   DRINKS_CATALOG_FULL_MESSAGE,
   DRINKS_CATALOG_MAX,
+  drinkCatalogCapacityMessage,
 } from './drink.constants';
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -98,6 +105,104 @@ export class DrinkService {
       }
       throw error;
     }
+  }
+
+  async importFromCsv(fileBuffer: Buffer): Promise<DrinkCsvImportResult> {
+    const content = fileBuffer.toString('utf-8');
+    const { validRows, invalidRows } = await parseDrinkCsv(content);
+    const currentCount = await this.prisma.drink.count();
+    const remainingSlots = DRINKS_CATALOG_MAX - currentCount;
+
+    if (remainingSlots <= 0) {
+      throw new ConflictException(DRINKS_CATALOG_FULL_MESSAGE);
+    }
+
+    if (validRows.length > remainingSlots) {
+      throw new ConflictException(
+        drinkCatalogCapacityMessage(currentCount, validRows.length),
+      );
+    }
+
+    const failed = [...invalidRows];
+    let imported = 0;
+
+    for (const row of validRows) {
+      let imageUrl: string | undefined;
+
+      try {
+        await this.assertTitleAvailable(row.title);
+
+        if (row.imageUrl) {
+          imageUrl = await downloadDrinkImageFromUrl(row.imageUrl);
+        }
+
+        await this.prisma.drink.create({
+          data: {
+            title: row.title,
+            description: row.description ?? '',
+            abv: row.abv,
+            rating: row.rating ?? 0,
+            price: row.price,
+            imageUrl: imageUrl ?? null,
+          },
+        });
+
+        imported += 1;
+      } catch (error: unknown) {
+        if (imageUrl) {
+          deleteDrinkImage(imageUrl);
+        }
+
+        failed.push({
+          row: row.rowNumber,
+          title: row.title,
+          messages: [this.toImportErrorMessage(error)],
+        });
+      }
+    }
+
+    const catalogTotal = await this.prisma.drink.count();
+
+    return {
+      imported,
+      failed,
+      catalogTotal,
+    };
+  }
+
+  private toImportErrorMessage(error: unknown): string {
+    if (error instanceof HttpException) {
+      const response = error.getResponse();
+      if (typeof response === 'string') {
+        return response;
+      }
+      if (
+        typeof response === 'object' &&
+        response !== null &&
+        'message' in response
+      ) {
+        const message = response.message;
+        if (typeof message === 'string') {
+          return message;
+        }
+        if (Array.isArray(message)) {
+          return message.join(', ');
+        }
+      }
+    }
+
+    return 'Failed to import row.';
+  }
+
+  async getCatalogCapacity() {
+    const total = await this.prisma.drink.count();
+    const remaining = Math.max(DRINKS_CATALOG_MAX - total, 0);
+
+    return {
+      total,
+      max: DRINKS_CATALOG_MAX,
+      remaining,
+    };
   }
 
   async findAll(query: FindDrinksQueryDto = {}): Promise<PaginatedDrinkList> {

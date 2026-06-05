@@ -22,6 +22,10 @@ export const drinkWriteThrottle = {
   default: { limit: THROTTLE_WRITE_LIMIT, ttl: THROTTLE_WRITE_TTL_MS },
 };
 
+export const drinkImportThrottle = {
+  default: { limit: 5, ttl: 10 * 60_000 },
+};
+
 export const authThrottle = {
   default: { limit: THROTTLE_AUTH_LIMIT, ttl: THROTTLE_AUTH_TTL_MS },
 };

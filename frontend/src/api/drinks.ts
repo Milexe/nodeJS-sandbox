@@ -5,6 +5,20 @@ import type { DrinkCatalogQuery } from '../types/drink-query'
 import { DRINKS_PAGE_SIZE } from '../types/drink-list'
 import type { DrinkFormValues } from '../utils/drinkFormValidation'
 import { buildDrinkPayload } from '../utils/drinkFormValidation'
+import type { DrinkCsvImportResult, DrinkCatalogCapacity } from '../types/drink-import'
+
+function parseApiError(body: unknown, fallback: string): string {
+  if (
+    typeof body === 'object' &&
+    body !== null &&
+    'message' in body &&
+    (typeof body.message === 'string' || Array.isArray(body.message))
+  ) {
+    return Array.isArray(body.message) ? body.message.join(', ') : body.message
+  }
+
+  return fallback
+}
 
 export type FetchDrinksParams = DrinkCatalogQuery & {
   page?: number
@@ -122,19 +136,37 @@ export async function saveDrink({
 
   if (!res.ok) {
     const body: unknown = await res.json().catch(() => null)
-    const message =
-      typeof body === 'object' &&
-      body !== null &&
-      'message' in body &&
-      (typeof body.message === 'string' || Array.isArray(body.message))
-        ? Array.isArray(body.message)
-          ? body.message.join(', ')
-          : body.message
-        : `HTTP ${res.status}`
-    throw new Error(message)
+    throw new Error(parseApiError(body, `HTTP ${res.status}`))
   }
 
   return res.json() as Promise<Drink>
+}
+
+export async function fetchDrinkCatalogCapacity(): Promise<DrinkCatalogCapacity> {
+  const res = await fetch(apiUrl('/drink/catalog/capacity'))
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`)
+  }
+
+  return res.json() as Promise<DrinkCatalogCapacity>
+}
+
+export async function importDrinksCsv(file: File): Promise<DrinkCsvImportResult> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await fetch(apiUrl('/drink/import'), {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!res.ok) {
+    const body: unknown = await res.json().catch(() => null)
+    throw new Error(parseApiError(body, `HTTP ${res.status}`))
+  }
+
+  return res.json() as Promise<DrinkCsvImportResult>
 }
 
 export async function deleteDrink(id: number): Promise<void> {

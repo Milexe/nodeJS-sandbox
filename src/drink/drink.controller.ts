@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -17,16 +18,39 @@ import { CreateDrinkDto } from './dto/create-drink.dto';
 import { FindDrinksQueryDto } from './dto/find-drinks-query.dto';
 import { UpdateDrinkDto } from './dto/update-drink.dto';
 import {
+  DRINK_CSV_MAX_BYTES,
   DRINK_IMAGE_MAX_BYTES,
   drinkImageFileFilter,
   drinkImageStorage,
 } from './drink-image.storage';
-import { drinkWriteThrottle } from '../throttle/throttle.config';
+import {
+  drinkImportThrottle,
+  drinkWriteThrottle,
+} from '../throttle/throttle.config';
 
 const drinkImageInterceptor = FileInterceptor('image', {
   storage: drinkImageStorage,
   fileFilter: drinkImageFileFilter,
   limits: { fileSize: DRINK_IMAGE_MAX_BYTES },
+});
+
+const drinkCsvInterceptor = FileInterceptor('file', {
+  storage: drinkImageStorage,
+  limits: { fileSize: DRINK_CSV_MAX_BYTES },
+  fileFilter: (_req, file, callback) => {
+    const allowedTypes = new Set(['text/csv', 'application/vnd.ms-excel']);
+    const allowedExtensions = file.originalname.toLowerCase().endsWith('.csv');
+
+    if (allowedTypes.has(file.mimetype) || allowedExtensions) {
+      callback(null, true);
+      return;
+    }
+
+    callback(
+      new BadRequestException('Import file must be a CSV (.csv).'),
+      false,
+    );
+  },
 });
 
 @Controller('drink')
@@ -41,6 +65,22 @@ export class DrinkController {
     @UploadedFile() image?: Express.Multer.File,
   ) {
     return this.drinkService.create(createDrinkDto, image);
+  }
+
+  @Post('import')
+  @Throttle(drinkImportThrottle)
+  @UseInterceptors(drinkCsvInterceptor)
+  importCsv(@UploadedFile() file?: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('CSV file is required.');
+    }
+
+    return this.drinkService.importFromCsv(file.buffer);
+  }
+
+  @Get('catalog/capacity')
+  getCatalogCapacity() {
+    return this.drinkService.getCatalogCapacity();
   }
 
   @Get()
