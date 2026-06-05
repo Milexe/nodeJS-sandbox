@@ -13,12 +13,18 @@ import type { Drink } from '../types/drink'
 import {
   drinkToFormValues,
   isAbvInvalid,
+  isDescriptionInvalid,
   isPriceInvalid,
   isRatingInvalid,
   isTitleInvalid,
   validateDrinkForm,
   type DrinkFormValues,
 } from '../utils/drinkFormValidation'
+import {
+  DRINK_DESCRIPTION_MAX_LENGTH,
+  DRINK_PRICE_MAX,
+  DRINK_TITLE_MAX_LENGTH,
+} from '../config/drinkLimits'
 import { PRICE_PREFIX } from '../utils/formatPrice'
 import {
   DEFAULT_DRINK_IMAGE,
@@ -46,6 +52,7 @@ const emptyForm: DrinkFormValues = {
 
 const emptyTouched = {
   title: false,
+  description: false,
   abv: false,
   rating: false,
   price: false,
@@ -132,6 +139,10 @@ function DrinkFormModalContent({
   const titleTaken = form.title.trim() ? titleCheckResult : false
 
   const titleInvalid = isTitleInvalid(form.title, touched.title, titleTaken)
+  const descriptionInvalid = isDescriptionInvalid(
+    form.description,
+    touched.description,
+  )
   const abvInvalid = isAbvInvalid(form.abv, touched.abv)
   const ratingInvalid = isRatingInvalid(form.rating, touched.rating)
   const priceInvalid = isPriceInvalid(form.price, touched.price)
@@ -228,7 +239,13 @@ function DrinkFormModalContent({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
-    setTouched({ title: true, abv: true, rating: true, price: true })
+    setTouched({
+      title: true,
+      description: true,
+      abv: true,
+      rating: true,
+      price: true,
+    })
 
     const validationError = validateDrinkForm(form, titleTaken)
     if (validationError) {
@@ -312,7 +329,7 @@ function DrinkFormModalContent({
             <input
               type="text"
               name="title"
-              maxLength={40}
+              maxLength={DRINK_TITLE_MAX_LENGTH}
               placeholder="e.g. Midnight Stout"
               value={form.title}
               aria-invalid={titleInvalid}
@@ -373,13 +390,17 @@ function DrinkFormModalContent({
             </div>
           </div>
 
-          <div className="modal__field">
+          <div
+            className={`modal__field${descriptionInvalid ? ' modal__field--invalid' : ''}`}
+          >
             <FieldLabel>Description</FieldLabel>
             <textarea
               name="description"
               rows={3}
+              maxLength={DRINK_DESCRIPTION_MAX_LENGTH}
               placeholder="Optional tasting notes or style"
               value={form.description}
+              aria-invalid={descriptionInvalid}
               onChange={(e) => updateField('description', e.target.value)}
             />
           </div>
@@ -431,6 +452,7 @@ function DrinkFormModalContent({
                   type="number"
                   name="price"
                   min={0}
+                  max={DRINK_PRICE_MAX}
                   step={0.01}
                   placeholder="12.99"
                   value={form.price}
