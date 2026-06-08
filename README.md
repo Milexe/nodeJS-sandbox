@@ -13,7 +13,7 @@ Portfolio sandbox for backend patterns, API demos, and full-stack experiments. E
 | Demo | Status | Highlights |
 |------|--------|------------|
 | REST API, CORS & Database | **Live** | Drinks catalog at `/drink` — CRUD, server-side search/sort/filters/pagination, image upload, CSV import, catalog cap (1000), `@nestjs/throttler` |
-| Server-side API Proxy | Planned | Nest forwards client requests to external APIs via `/gif` |
+| External API Proxy & Secret Handling | **Live** | ArtSearch artwork search via Nest — hides API key, validates queries, maps upstream errors and quota (`GET /gif`) |
 | JWT Authentication & Roles | Planned | Login, refresh tokens, guards, role-based access |
 | WebSockets & Real-time | Planned | Nest WebSocket gateway, rooms, push updates |
 | OpenAPI & Swagger | Planned | Interactive docs from controllers and DTOs |
@@ -81,6 +81,7 @@ See [`.env.example`](.env.example) (API) and [`frontend/.env.example`](frontend/
 Key variables:
 
 - `DATABASE_URL` — PostgreSQL connection string
+- `ARTSEARCH_SECRET` — ArtSearch API key (server only; required for `/gif`)
 - `CORS_ORIGIN` — allowed frontend origins (comma-separated)
 - `VITE_API_URL` — API base URL baked into the frontend build at compile time
 
@@ -89,12 +90,17 @@ Key variables:
 SPA `/drinks`, API `/drink` — CRUD with multipart images, server-side search/sort/filters/pagination, CSV import (`POST /drink/import`, optional `imageUrl`), 1000-drink cap, and `@nestjs/throttler` on routes.
 
 Images: uploads in `./uploads/` (max 2 MB; ephemeral on Render — redeploy clears files). Sample for CSV at `/samples/csv-import-example.png`. Missing files show a default placeholder in the UI.
+
+## External API proxy (ArtSearch)
+
+SPA `/gif`, API `GET /gif` — proxies the [ArtSearch](https://artsearch.io/) Search Artworks API. The browser never sees `ARTSEARCH_SECRET`; Nest validates query params via DTO (search text, type, material, technique, pagination), forwards the request with `x-api-key`, maps upstream errors (402 daily quota, 429 rate limit, timeouts), and surfaces quota from `X-Api-Quota-*` headers. Includes route logging middleware, throttling on GET routes, and client-side fallback data when the upstream is unavailable or the free-tier daily quota is exceeded (50 requests/day).
+
 ## Deployment
 
 | Layer | Platform | Role |
 |-------|----------|------|
 | Frontend | [Vercel](https://vercel.com) | React SPA, SPA routing via `vercel.json` rewrites |
-| API | [Render](https://render.com) | NestJS REST API (`/drink`, …) |
+| API | [Render](https://render.com) | NestJS REST API (`/drink`, `/gif`, …) |
 | Database | [Neon](https://neon.tech) | Serverless PostgreSQL |
 
 **Live frontend:** [https://node-js-sandbox.vercel.app/](https://node-js-sandbox.vercel.app/)
