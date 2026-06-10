@@ -34,9 +34,9 @@ export const demos: Demo[] = [
   {
     id: 'websockets',
     title: 'WebSockets & Real-time',
-    summary: 'Nest WebSocket gateway — live events, rooms, and push updates without polling',
-    path: '/ws',
-    available: false,
+    summary: 'Two-user chat via Nest WebSocket gateway — real-time broadcast, typing indicator, and message history',
+    path: '/ws/1',
+    available: true,
   },
   {
     id: 'openapi',
@@ -48,7 +48,8 @@ export const demos: Demo[] = [
 ]
 
 export function findActiveDemo(pathname: string): Demo | undefined {
-  return demos.find(
-    (demo) => pathname === demo.path || pathname.startsWith(`${demo.path}/`),
-  )
+  return demos.find((demo) => {
+    const base = demo.id === 'websockets' ? '/ws' : demo.path
+    return pathname === base || pathname.startsWith(`${base}/`)
+  })
 }

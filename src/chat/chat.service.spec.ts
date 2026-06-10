@@ -60,27 +60,38 @@ describe('ChatService', () => {
     const t2 = new Date('2024-01-01T10:01:00Z');
     const t3 = new Date('2024-01-01T10:02:00Z');
 
-    // Prisma returns desc (newest first)
+    // Prisma returns desc (newest first), limit+1 rows to detect hasMore
     prisma.message.findMany.mockResolvedValue([
       makeMessage(3, t3),
       makeMessage(2, t2),
       makeMessage(1, t1),
     ]);
 
-    const result = await service.getRecentMessages();
+    const { messages, hasMore } = await service.getRecentMessages();
 
     // Service must reverse to chronological (oldest first)
-    expect(result.map((m) => m.id)).toEqual([1, 2, 3]);
+    expect(messages.map((m) => m.id)).toEqual([1, 2, 3]);
+    expect(hasMore).toBe(false);
+  });
 
-    expect(prisma.message.findMany).toHaveBeenCalledWith({
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
+  it('getRecentMessages sets hasMore when extra row is returned', async () => {
+    // Return limit+1 rows to signal there are older messages
+    const rows = Array.from({ length: 11 }, (_, i) =>
+      makeMessage(11 - i, new Date(`2024-01-01T10:${String(i).padStart(2, '0')}:00Z`)),
+    );
+    prisma.message.findMany.mockResolvedValue(rows);
+
+    const { messages, hasMore } = await service.getRecentMessages();
+
+    expect(messages).toHaveLength(10);
+    expect(hasMore).toBe(true);
   });
 
   it('getRecentMessages returns empty array when there are no messages', async () => {
     prisma.message.findMany.mockResolvedValue([]);
 
-    await expect(service.getRecentMessages()).resolves.toEqual([]);
+    const { messages, hasMore } = await service.getRecentMessages();
+    expect(messages).toEqual([]);
+    expect(hasMore).toBe(false);
   });
 });

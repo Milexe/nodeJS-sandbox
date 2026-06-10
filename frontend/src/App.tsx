@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import AppHeader from './components/AppHeader'
+import ChatPage from './pages/ChatPage'
 import DrinkDetailPage from './pages/DrinkDetailPage'
 import DrinksListPage from './pages/DrinksListPage'
 import GifPage from './pages/GifPage'
@@ -18,6 +19,7 @@ export default function App() {
               <Route path="/drinks" element={<DrinksListPage />} />
               <Route path="/drinks/:id" element={<DrinkDetailPage />} />
               <Route path="/gif" element={<GifPage />} />
+              <Route path="/ws/:userId" element={<ChatPage />} />
             </Routes>
           </main>
         </div>

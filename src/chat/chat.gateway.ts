@@ -1,12 +1,11 @@
 import {
+  ConnectedSocket,
   MessageBody,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
-import { ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { createCorsOriginValidator } from '../cors.config';
 import { ChatService } from './chat.service';
@@ -20,13 +19,11 @@ import { TypingDto } from './dto/typing.dto';
     credentials: true,
   },
 })
-export class ChatGateway implements OnGatewayInit {
+export class ChatGateway {
   @WebSocketServer()
   private readonly server: Server;
 
   constructor(private readonly chatService: ChatService) {}
-
-  afterInit() {}
 
   @SubscribeMessage('message')
   async handleMessage(@MessageBody() dto: SendMessageDto): Promise<void> {

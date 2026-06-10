@@ -5,6 +5,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import pg from 'pg';
 import { resolveMcpMode, resolveMcpServerName } from './mcp-config.mjs';
 import { registerAuthReadTools } from './tools/auth-read-tools.mjs';
+import { registerChatTools } from './tools/chat-tools.mjs';
 import { registerDrinkTools } from './tools/drinks-tools.mjs';
 import { registerDrinkResources } from './tools/drinks-resources.mjs';
 import { registerDrinkPrompts } from './tools/drinks-prompts.mjs';
@@ -34,6 +35,7 @@ const scopeLabel =
 
 registerDrinkTools(server, pool, { mode });
 registerAuthReadTools(server, pool, scopeLabel);
+registerChatTools(server, pool);
 registerDrinkResources(server, pool);
 registerDrinkPrompts(server);
 
