@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -391,7 +392,10 @@ export default function GifPage() {
     }
   }, [appliedSearch, offset])
 
-  const fetchKey = queryForFetch ? JSON.stringify(queryForFetch) : null
+  const fetchKey = useMemo(
+    () => (queryForFetch ? JSON.stringify(queryForFetch) : null),
+    [queryForFetch],
+  )
   const [loadedKey, setLoadedKey] = useState<string | null>(null)
   const demoResult = useMemo(() => {
     if (demoArtworksPool === null || queryForFetch === null) {
@@ -478,6 +482,8 @@ export default function GifPage() {
   const showNoMatches =
     appliedSearch !== null && !loading && !error && displayResult.available === 0
 
+  const handleCloseModal = useCallback(() => setSelectedArtwork(null), [])
+
   function handleSearchSubmit(event?: FormEvent) {
     event?.preventDefault()
 
@@ -501,14 +507,6 @@ export default function GifPage() {
   function handleClearFilters() {
     setSearchInput('')
     setFilters(DEFAULT_FILTERS)
-    setAppliedSearch(null)
-    setOffset(0)
-    setResult(EMPTY_RESPONSE)
-    setQuota(null)
-    setError(null)
-    setIsDemoGallery(false)
-    setDemoArtworksPool(null)
-    setLoadedKey(null)
   }
 
   return (
@@ -640,7 +638,7 @@ export default function GifPage() {
         ) : null}
 
         {loading ? (
-          <ArtworkMasonry label="Loading artworks">
+          <ArtworkMasonry label="Loading artworks" columns={3}>
             {Array.from({ length: ARTWORKS_PAGE_SIZE }, (_, index) => (
               <ArtworkCardSkeleton key={`skeleton-${index}`} index={index} />
             ))}
@@ -663,7 +661,7 @@ export default function GifPage() {
           <>
             <ArtworkMasonry
               label="Artwork results"
-              columns={isDemoGallery ? 3 : 2}
+              columns={3}
             >
               {displayResult.artworks.map((artwork, index) => (
                 <ArtworkCard
@@ -692,7 +690,7 @@ export default function GifPage() {
 
       <ArtworkPreviewModal
         artwork={selectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
+        onClose={handleCloseModal}
       />
     </>
   )

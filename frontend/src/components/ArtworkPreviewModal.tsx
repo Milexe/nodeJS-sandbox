@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type MouseEvent } from 'react'
+import { useEffect, useId, useRef, useState, type MouseEvent } from 'react'
 import type { ArtsearchArtwork } from '../types/artsearch'
 import { artworkImageFilename } from '../utils/artworkImage'
 
@@ -13,6 +13,8 @@ export default function ArtworkPreviewModal({
 }: ArtworkPreviewModalProps) {
   const titleId = useId()
   const overlayPressed = useRef(false)
+  const [loadedArtworkId, setLoadedArtworkId] = useState<number | null>(null)
+  const imageLoaded = loadedArtworkId === artwork?.id
 
   useEffect(() => {
     if (!artwork) {
@@ -74,10 +76,14 @@ export default function ArtworkPreviewModal({
         </div>
 
         <div className="modal__body artwork-preview__body">
+          {!imageLoaded && (
+            <div className="artwork-preview__shimmer" aria-hidden="true" />
+          )}
           <img
-            className="artwork-preview__image"
+            className={`artwork-preview__image${imageLoaded ? ' artwork-preview__image--loaded' : ''}`}
             src={artwork.image}
             alt={artwork.title}
+            onLoad={() => setLoadedArtworkId(artwork.id)}
           />
           <p className="artwork-preview__title">{artwork.title}</p>
         </div>

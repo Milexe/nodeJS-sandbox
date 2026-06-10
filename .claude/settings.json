@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/log-tool.mjs"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "app-local": {
+      "command": "node",
+      "args": [
+        "d:/nodejs_sandbox/nodeJS-sandbox/mcp/app-server.mjs"
+      ],
+      "env": {}
+    },
+    "app-live-readonly": {
+      "command": "node",
+      "args": [
+        "d:/nodejs_sandbox/nodeJS-sandbox/mcp/app-server.mjs"
+      ],
+      "env": {}
+    }
+  }
+}
