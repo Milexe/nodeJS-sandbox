@@ -29,5 +29,7 @@ services:
         sync: false
       - key: CORS_ALLOW_VERCEL_PREVIEW
         value: "true"
+      - key: SWAGGER_ENABLED
+        value: "true"
       - key: ARTSEARCH_SECRET
         sync: false

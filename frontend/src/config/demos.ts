@@ -4,6 +4,8 @@ export type Demo = {
   summary: string
   path: string
   available: boolean
+  external?: boolean
+  wip?: boolean
 }
 
 export const demos: Demo[] = [
@@ -42,8 +44,10 @@ export const demos: Demo[] = [
     id: 'openapi',
     title: 'OpenAPI & Swagger',
     summary: 'Interactive API docs — schema and try-it-out UI generated from Nest controllers and DTOs',
-    path: '/docs',
-    available: false,
+    path: '/api/docs',
+    available: true,
+    external: true,
+    wip: true,
   },
 ]
 

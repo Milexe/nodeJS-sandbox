@@ -489,6 +489,12 @@
   color: var(--text);
 }
 
+.demo-card__badge--wip {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 .drinks-page__toolbar {
   display: flex;
   flex-wrap: wrap;

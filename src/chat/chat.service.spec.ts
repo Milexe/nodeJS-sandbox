@@ -77,7 +77,10 @@ describe('ChatService', () => {
   it('getRecentMessages sets hasMore when extra row is returned', async () => {
     // Return limit+1 rows to signal there are older messages
     const rows = Array.from({ length: 11 }, (_, i) =>
-      makeMessage(11 - i, new Date(`2024-01-01T10:${String(i).padStart(2, '0')}:00Z`)),
+      makeMessage(
+        11 - i,
+        new Date(`2024-01-01T10:${String(i).padStart(2, '0')}:00Z`),
+      ),
     );
     prisma.message.findMany.mockResolvedValue(rows);
 

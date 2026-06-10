@@ -1,7 +1,6 @@
 import {
   ConflictException,
   HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -240,15 +239,12 @@ export class DrinkService {
     };
   }
 
-  async findOne(id: string) {
-    try {
-      return await this.prisma.drink.findUnique({
-        where: { id: parseInt(id, 10) },
-      });
-    } catch (error) {
-      console.log(error);
-      throw new HttpException('Roman is a teapot', HttpStatus.I_AM_A_TEAPOT);
+  async findOne(id: number) {
+    const drink = await this.prisma.drink.findUnique({ where: { id } });
+    if (!drink) {
+      throw new NotFoundException(`Drink #${id} not found`);
     }
+    return drink;
   }
 
   async update(
@@ -307,13 +303,15 @@ export class DrinkService {
 
   async remove(id: number) {
     const existing = await this.prisma.drink.findUnique({ where: { id } });
-    if (existing?.imageUrl) {
+    if (!existing) {
+      throw new NotFoundException(`Drink #${id} not found`);
+    }
+
+    if (existing.imageUrl) {
       deleteDrinkImage(existing.imageUrl);
     }
 
-    await this.prisma.drink.delete({
-      where: { id },
-    });
+    await this.prisma.drink.delete({ where: { id } });
     return `This action removes a #${id} drink`;
   }
 }

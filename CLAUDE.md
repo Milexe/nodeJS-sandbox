@@ -9,6 +9,7 @@ Portfolio sandbox demonstrating backend patterns, REST API design, and full-stac
 - Prisma ORM + PostgreSQL
 - JWT auth (access + refresh tokens)
 - class-validator, @nestjs/throttler
+- @nestjs/swagger (Swagger UI at `/api/docs`, enabled via `SWAGGER_ENABLED=true`)
 
 **Frontend** — `frontend/`
 - React + TypeScript + Vite
@@ -82,6 +83,15 @@ prisma/
   hooks/
     log-tool.mjs   # PreToolUse hook — logs every tool call
 ```
+
+## Conventions
+
+### DTOs
+- Every field in a request DTO must have `@ApiProperty()` or `@ApiPropertyOptional()` from `@nestjs/swagger`.
+- Use `@ApiProperty({ example: ..., minimum: ..., maximum: ..., maxLength: ... })` — populate all constraints that exist on the field.
+- For enums/`@IsIn()` fields: pass `enum: ARRAY_CONSTANT` so Swagger renders a dropdown.
+- In `PartialType`-based update DTOs: import `PartialType` from `@nestjs/swagger`, not `@nestjs/mapped-types` — otherwise Swagger metadata is lost.
+- Internal DTOs not used in HTTP endpoints (e.g. CSV row parsers) are exempt.
 
 ## Database
 
