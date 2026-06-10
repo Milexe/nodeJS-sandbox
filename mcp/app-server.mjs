@@ -35,7 +35,7 @@ const scopeLabel =
 
 registerDrinkTools(server, pool, { mode });
 registerAuthReadTools(server, pool, scopeLabel);
-registerChatTools(server, pool);
+registerChatTools(server, pool, { mode });
 registerDrinkResources(server, pool);
 registerDrinkPrompts(server);
 

@@ -18,7 +18,9 @@ function normalizeMessage(row) {
   };
 }
 
-export function registerChatTools(server, pool) {
+export function registerChatTools(server, pool, options = {}) {
+  const mode = options.mode === 'readonly' ? 'readonly' : 'readwrite';
+
   server.tool(
     'list_messages',
     'List recent chat messages, newest last. Use limit to control how many to fetch.',
@@ -37,47 +39,49 @@ export function registerChatTools(server, pool) {
     },
   );
 
-  server.tool(
-    'create_message',
-    'Create a chat message. userId must be 1 or 2. Optionally pass createdAt (ISO 8601) to set a custom timestamp.',
-    {
-      userId: z.number().int().min(1).max(2),
-      text: z.string().trim().min(1).max(500),
-      createdAt: z.string().datetime().optional(),
-    },
-    async ({ userId, text, createdAt }) => {
-      const { rows } = createdAt
-        ? await pool.query(
-            `INSERT INTO messages ("userId", text, created_at) VALUES ($1, $2, $3) RETURNING id, "userId", text, created_at`,
-            [userId, text, createdAt],
-          )
-        : await pool.query(
-            `INSERT INTO messages ("userId", text) VALUES ($1, $2) RETURNING id, "userId", text, created_at`,
-            [userId, text],
-          );
-      return toTextContent(normalizeMessage(rows[0]));
-    },
-  );
+  if (mode === 'readwrite') {
+    server.tool(
+      'create_message',
+      'Create a chat message. userId must be 1 or 2. Optionally pass createdAt (ISO 8601) to set a custom timestamp.',
+      {
+        userId: z.number().int().min(1).max(2),
+        text: z.string().trim().min(1).max(500),
+        createdAt: z.string().datetime().optional(),
+      },
+      async ({ userId, text, createdAt }) => {
+        const { rows } = createdAt
+          ? await pool.query(
+              `INSERT INTO messages ("userId", text, created_at) VALUES ($1, $2, $3) RETURNING id, "userId", text, created_at`,
+              [userId, text, createdAt],
+            )
+          : await pool.query(
+              `INSERT INTO messages ("userId", text) VALUES ($1, $2) RETURNING id, "userId", text, created_at`,
+              [userId, text],
+            );
+        return toTextContent(normalizeMessage(rows[0]));
+      },
+    );
 
-  server.tool(
-    'delete_message',
-    'Delete a chat message by id.',
-    {
-      id: z.number().int().positive(),
-    },
-    async ({ id }) => {
-      const { rowCount } = await pool.query('DELETE FROM messages WHERE id = $1', [id]);
-      return toTextContent({ deleted: rowCount > 0, id });
-    },
-  );
+    server.tool(
+      'delete_message',
+      'Delete a chat message by id.',
+      {
+        id: z.number().int().positive(),
+      },
+      async ({ id }) => {
+        const { rowCount } = await pool.query('DELETE FROM messages WHERE id = $1', [id]);
+        return toTextContent({ deleted: rowCount > 0, id });
+      },
+    );
 
-  server.tool(
-    'clear_messages',
-    'Delete all chat messages. Use for dev/demo resets only.',
-    {},
-    async () => {
-      const { rowCount } = await pool.query('DELETE FROM messages');
-      return toTextContent({ cleared: rowCount });
-    },
-  );
+    server.tool(
+      'clear_messages',
+      'Delete all chat messages. Use for dev/demo resets only.',
+      {},
+      async () => {
+        const { rowCount } = await pool.query('DELETE FROM messages');
+        return toTextContent({ cleared: rowCount });
+      },
+    );
+  }
 }
