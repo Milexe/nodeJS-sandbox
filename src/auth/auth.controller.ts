@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -17,6 +18,7 @@ import { Roles } from './decorators/roles.decorator';
 import type { Request } from 'express';
 import { authThrottle } from '../throttle/throttle.config';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -24,6 +26,9 @@ export class AuthController {
   @Post('login')
   @Throttle(authThrottle)
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Log in and receive access + refresh tokens' })
+  @ApiResponse({ status: 200, description: 'Login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -31,6 +36,10 @@ export class AuthController {
   @Post('refresh')
   @Throttle(authThrottle)
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange refresh token for a new token pair' })
+  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } }, required: ['refreshToken'] } })
+  @ApiResponse({ status: 200, description: 'Tokens refreshed' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refresh(@Body() body: { refreshToken: string }) {
     return this.authService.refresh(body.refreshToken);
   }
@@ -38,12 +47,19 @@ export class AuthController {
   @Post('logout')
   @Throttle(authThrottle)
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Revoke refresh token' })
+  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } }, required: ['refreshToken'] } })
+  @ApiResponse({ status: 200, description: 'Logged out' })
   async logout(@Body() body: { refreshToken: string }) {
     return this.authService.logout(body.refreshToken);
   }
 
   @UseGuards(AuthGuard)
   @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiResponse({ status: 200, description: 'Current user data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMe(@Req() req: Request) {
     return this.authService.getMe(req.user!.sub);
   }
@@ -51,6 +67,10 @@ export class AuthController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   @Get('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin-only endpoint' })
+  @ApiResponse({ status: 200, description: 'Access granted' })
+  @ApiResponse({ status: 403, description: 'Forbidden — admin role required' })
   adminOnly() {
     return { message: 'Доступ только для админов' };
   }
