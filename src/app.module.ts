@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ChatModule } from './chat/chat.module';
 import { GifModule } from './gif/gif.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { DrinkModule } from './drink/drink.module';
@@ -14,6 +15,7 @@ import { ThrottlerBehindProxyGuard } from './throttle/throttler-behind-proxy.gua
   imports: [
     ThrottlerModule.forRoot(throttlerConfig),
     HealthModule,
+    ChatModule,
     GifModule,
     PrismaModule,
     DrinkModule,
