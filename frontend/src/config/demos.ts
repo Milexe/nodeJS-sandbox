@@ -17,10 +17,11 @@ export const demos: Demo[] = [
   },
   {
     id: 'gif',
-    title: 'Server-side API Proxy',
-    summary: 'Nest forwards client requests to external APIs through /gif',
+    title: 'External API Proxy & Secret Handling',
+    summary:
+      'ArtSearch artwork search via Nest — hides API key, validates queries, maps upstream errors and quota',
     path: '/gif',
-    available: false,
+    available: true,
   },
   {
     id: 'auth',

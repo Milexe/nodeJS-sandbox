@@ -5,6 +5,7 @@
 
 #keys
 .env
+.claude/settings.local.json
 
 # Logs
 logs

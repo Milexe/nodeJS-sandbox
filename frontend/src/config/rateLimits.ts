@@ -14,9 +14,9 @@ export const RATE_LIMIT_RULES: RateLimitRule[] = [
     label: 'Read (GET)',
     limit: 5,
     windowLabel: '5 seconds',
-    detail: 'Catalog list, drink details, and other GET endpoints',
+    detail: 'Catalog list, drink details, /gif proxy, and other GET endpoints',
     demoHint:
-      'Spam F5 (refresh) on this page — after 5 loads within 5 seconds you should see an error instead of the catalog.',
+      'Spam F5 (refresh) on the drinks or art search page — after 5 loads within 5 seconds you should see an error instead of results.',
   },
   {
     id: 'write',
