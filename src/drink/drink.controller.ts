@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -18,6 +19,8 @@ import {
   ApiConsumes,
   ApiBody,
   ApiParam,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
@@ -62,6 +65,7 @@ const drinkCsvInterceptor = FileInterceptor('file', {
 });
 
 @ApiTags('drinks')
+@ApiExtraModels(CreateDrinkDto, UpdateDrinkDto)
 @Controller('drink')
 export class DrinkController {
   constructor(private readonly drinkService: DrinkService) {}
@@ -74,7 +78,7 @@ export class DrinkController {
   @ApiBody({
     schema: {
       allOf: [
-        { $ref: '#/components/schemas/CreateDrinkDto' },
+        { $ref: getSchemaPath(CreateDrinkDto) },
         { properties: { image: { type: 'string', format: 'binary', description: 'Optional drink image' } } },
       ],
     },
@@ -126,8 +130,9 @@ export class DrinkController {
   @ApiOperation({ summary: 'Get a drink by ID' })
   @ApiParam({ name: 'id', description: 'Drink ID' })
   @ApiResponse({ status: 200, description: 'Drink found' })
+  @ApiResponse({ status: 400, description: 'Invalid ID format' })
   @ApiResponse({ status: 404, description: 'Drink not found' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.drinkService.findOne(id);
   }
 
@@ -140,19 +145,20 @@ export class DrinkController {
   @ApiBody({
     schema: {
       allOf: [
-        { $ref: '#/components/schemas/UpdateDrinkDto' },
+        { $ref: getSchemaPath(UpdateDrinkDto) },
         { properties: { image: { type: 'string', format: 'binary', description: 'Replacement image' } } },
       ],
     },
   })
   @ApiResponse({ status: 200, description: 'Drink updated' })
+  @ApiResponse({ status: 400, description: 'Invalid ID format' })
   @ApiResponse({ status: 404, description: 'Drink not found' })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateDrinkDto: UpdateDrinkDto,
     @UploadedFile() image?: Express.Multer.File,
   ) {
-    return this.drinkService.update(parseInt(id, 10), updateDrinkDto, image);
+    return this.drinkService.update(id, updateDrinkDto, image);
   }
 
   @Delete(':id')
@@ -160,8 +166,9 @@ export class DrinkController {
   @ApiOperation({ summary: 'Delete a drink' })
   @ApiParam({ name: 'id', description: 'Drink ID' })
   @ApiResponse({ status: 200, description: 'Drink deleted' })
+  @ApiResponse({ status: 400, description: 'Invalid ID format' })
   @ApiResponse({ status: 404, description: 'Drink not found' })
-  remove(@Param('id') id: string) {
-    return this.drinkService.remove(parseInt(id, 10));
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.drinkService.remove(id);
   }
 }

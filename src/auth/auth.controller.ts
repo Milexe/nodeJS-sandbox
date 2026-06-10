@@ -8,10 +8,11 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -37,21 +38,21 @@ export class AuthController {
   @Throttle(authThrottle)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Exchange refresh token for a new token pair' })
-  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } }, required: ['refreshToken'] } })
   @ApiResponse({ status: 200, description: 'Tokens refreshed' })
+  @ApiResponse({ status: 400, description: 'Missing refresh token' })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
-  async refresh(@Body() body: { refreshToken: string }) {
-    return this.authService.refresh(body.refreshToken);
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
   }
 
   @Post('logout')
   @Throttle(authThrottle)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revoke refresh token' })
-  @ApiBody({ schema: { properties: { refreshToken: { type: 'string' } }, required: ['refreshToken'] } })
   @ApiResponse({ status: 200, description: 'Logged out' })
-  async logout(@Body() body: { refreshToken: string }) {
-    return this.authService.logout(body.refreshToken);
+  @ApiResponse({ status: 400, description: 'Missing refresh token' })
+  async logout(@Body() dto: RefreshTokenDto) {
+    return this.authService.logout(dto.refreshToken);
   }
 
   @UseGuards(AuthGuard)

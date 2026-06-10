@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import SocialLinks from '../components/SocialLinks'
 import { demos } from '../config/demos'
+import { apiUrl } from '../api'
 
 const PROJECT_TITLE = 'NodeJS Sandbox'
 const PROJECT_AUTHOR = 'Roman'
@@ -50,10 +51,22 @@ export default function HomePage() {
           {demos.map((demo) => (
             <li key={demo.id} className="demo-list__item">
               {demo.available ? (
+                demo.external ? (
+                  <a
+                    href={apiUrl(demo.path)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="demo-card demo-card--active"
+                  >
+                    <span className="demo-card__title">{demo.title}</span>
+                    <span className="demo-card__summary">{demo.summary}</span>
+                  </a>
+                ) : (
                 <Link to={demo.path} className="demo-card demo-card--active">
                   <span className="demo-card__title">{demo.title}</span>
                   <span className="demo-card__summary">{demo.summary}</span>
                 </Link>
+                )
               ) : (
                 <div className="demo-card demo-card--soon" aria-disabled="true">
                   <span className="demo-card__title">

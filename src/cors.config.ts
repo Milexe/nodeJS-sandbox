@@ -10,10 +10,14 @@ export function createCorsOriginValidator():
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => void) {
-  const allowed = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
-    .split(',')
-    .map((value) => value.trim())
-    .filter(Boolean);
+  const allowed = [
+    ...(process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+    // Allow Swagger UI requests from the API's own origin (same host, different path)
+    `http://localhost:${process.env.PORT ?? 3000}`,
+  ];
 
   const allowVercelPreview = process.env.CORS_ALLOW_VERCEL_PREVIEW === 'true';
 
