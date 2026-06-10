@@ -65,7 +65,7 @@ export default function ChatPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [input, setInput] = useState('')
   const [otherTyping, setOtherTyping] = useState(false)
-  const [connected, setConnected] = useState(false)
+  const [wsStatus, setWsStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [socketId, setSocketId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [floatingDate, setFloatingDate] = useState<string | null>(null)
@@ -111,12 +111,15 @@ export default function ChatPage() {
     socketRef.current = socket
 
     socket.on('connect', () => {
-      setConnected(true)
+      setWsStatus('connected')
       setSocketId(socket.id ?? null)
     })
     socket.on('disconnect', () => {
-      setConnected(false)
+      setWsStatus('disconnected')
       setSocketId(null)
+    })
+    socket.on('connect_error', () => {
+      setWsStatus('disconnected')
     })
 
     socket.on('message', (msg: ChatMessage) => {
@@ -231,11 +234,11 @@ export default function ChatPage() {
           <strong className="chat-page__notice-title">WebSockets &amp; Real-time</strong>
           <button
             type="button"
-            className={`chat-ws-status chat-ws-status--${connected ? 'connected' : 'disconnected'}`}
+            className={`chat-ws-status chat-ws-status--${wsStatus}`}
             onClick={() => setWsDialogOpen(true)}
             aria-haspopup="dialog"
             aria-expanded={wsDialogOpen}
-            aria-label={`WebSocket ${connected ? 'connected' : 'disconnected'}. Open details.`}
+            aria-label={`WebSocket ${wsStatus === 'connected' ? 'connected' : wsStatus === 'connecting' ? 'connecting' : 'disconnected'}. Open details.`}
           >
             <span className="chat-ws-status__dot" aria-hidden="true" />
             <span className="chat-ws-status__label">WS</span>
@@ -320,9 +323,9 @@ export default function ChatPage() {
 
                   <div className="health-status-dialog__status">
                     <span
-                      className={`health-status-dialog__badge health-status-dialog__badge--${connected ? 'ok' : 'error'}`}
+                      className={`health-status-dialog__badge health-status-dialog__badge--${wsStatus === 'connected' ? 'ok' : wsStatus === 'connecting' ? 'loading' : 'error'}`}
                     >
-                      {connected ? 'Connected' : 'Disconnected'}
+                      {wsStatus === 'connected' ? 'Connected' : wsStatus === 'connecting' ? 'Connecting…' : 'Disconnected'}
                     </span>
                   </div>
                 </div>
@@ -418,7 +421,7 @@ export default function ChatPage() {
         <button
           type="button"
           className="drinks-page__btn chat-input__send"
-          disabled={!input.trim() || !connected}
+          disabled={!input.trim() || wsStatus !== 'connected'}
           onClick={handleSend}
         >
           Send

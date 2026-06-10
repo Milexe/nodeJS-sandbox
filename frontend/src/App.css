@@ -2407,8 +2407,21 @@
 }
 
 .chat-ws-status--disconnected .chat-ws-status__dot {
-  background: var(--text-muted);
-  opacity: 0.5;
+  background: var(--danger);
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 28%, transparent);
+}
+
+.chat-ws-status--connecting .chat-ws-status__dot {
+  background: #f97316;
+  opacity: 1;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #f97316 28%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chat-ws-status--connecting .chat-ws-status__dot {
+    animation: health-status-pulse 1.2s ease-in-out infinite;
+  }
 }
 
 .ws-status-dialog__body {
