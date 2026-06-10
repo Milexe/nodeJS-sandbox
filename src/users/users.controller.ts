@@ -32,20 +32,7 @@ export class UsersController {
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    try {
-      const user = await this.usersService.create(dto.email, passwordHash);
-      return { id: user.id, email: user.email, createdAt: user.createdAt };
-    } catch (error: unknown) {
-      // P2002 — Prisma unique constraint violation (race condition)
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'code' in error &&
-        error.code === 'P2002'
-      ) {
-        throw new ConflictException('Email already exists');
-      }
-      throw error;
-    }
+    const user = await this.usersService.create(dto.email, passwordHash);
+    return { id: user.id, email: user.email, createdAt: user.createdAt };
   }
 }

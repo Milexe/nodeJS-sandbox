@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 import { ChatModule } from './chat/chat.module';
 import { GifModule } from './gif/gif.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -26,6 +27,10 @@ import { ThrottlerBehindProxyGuard } from './throttle/throttler-behind-proxy.gua
     {
       provide: APP_GUARD,
       useClass: ThrottlerBehindProxyGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: PrismaExceptionFilter,
     },
   ],
 })

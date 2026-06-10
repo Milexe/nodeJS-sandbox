@@ -111,12 +111,10 @@ export class DrinkService {
       return await this.prisma.drink.create({
         data: this.buildCreateData(createDrinkDto, imageUrl),
       });
-    } catch (error: unknown) {
+    } catch (error) {
+      // Roll back the saved image; the global filter maps P2002 -> 409.
       if (imageUrl) {
         deleteDrinkImage(imageUrl);
-      }
-      if (isUniqueConstraintError(error)) {
-        throw new ConflictException('Title already exists');
       }
       throw error;
     }
@@ -290,12 +288,10 @@ export class DrinkService {
           imageUrl: nextImageUrl,
         },
       });
-    } catch (error: unknown) {
+    } catch (error) {
+      // Roll back the uploaded image; the global filter maps P2002 -> 409.
       if (uploadedImageUrl) {
         deleteDrinkImage(uploadedImageUrl);
-      }
-      if (isUniqueConstraintError(error)) {
-        throw new ConflictException('Title already exists');
       }
       throw error;
     }
