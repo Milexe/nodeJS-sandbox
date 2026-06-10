@@ -38,6 +38,15 @@ model RefreshToken {
 
   @@map("refresh_tokens")
 }
+model Message {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  text      String   @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("messages")
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
