@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client'
 import { apiUrl } from '../api'
-import type { ChatMessage, MessagesResponse } from '../types/chat'
+import type { MessagesResponse } from '../types/chat'
 
 const SOCKET_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/$/, '')
 

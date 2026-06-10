@@ -66,6 +66,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [otherTyping, setOtherTyping] = useState(false)
   const [connected, setConnected] = useState(false)
+  const [socketId, setSocketId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [floatingDate, setFloatingDate] = useState<string | null>(null)
   const [wsDialogOpen, setWsDialogOpen] = useState(false)
@@ -96,10 +97,6 @@ export default function ChatPage() {
     setFloatingDate(current)
   }
 
-  if (userId !== 1 && userId !== 2) {
-    return <p className="chat-page__error">Invalid user. Use /ws/1 or /ws/2.</p>
-  }
-
   useEffect(() => {
     fetchMessages()
       .then(({ messages, hasMore }) => {
@@ -113,8 +110,14 @@ export default function ChatPage() {
     const socket = createChatSocket()
     socketRef.current = socket
 
-    socket.on('connect', () => setConnected(true))
-    socket.on('disconnect', () => setConnected(false))
+    socket.on('connect', () => {
+      setConnected(true)
+      setSocketId(socket.id ?? null)
+    })
+    socket.on('disconnect', () => {
+      setConnected(false)
+      setSocketId(null)
+    })
 
     socket.on('message', (msg: ChatMessage) => {
       setMessages((prev) => [...prev, msg])
@@ -217,6 +220,10 @@ export default function ChatPage() {
     }
   }
 
+  if (userId !== 1 && userId !== 2) {
+    return <p className="chat-page__error">Invalid user. Use /ws/1 or /ws/2.</p>
+  }
+
   return (
     <>
       <section className="chat-page__notice" aria-label="How this demo works">
@@ -303,12 +310,10 @@ export default function ChatPage() {
                       <span className="health-status-dialog__fact-label">Current user</span>
                       <code className="health-status-dialog__fact-value">User {userId}</code>
                     </div>
-                    {socketRef.current?.id ? (
+                    {socketId ? (
                       <div className="health-status-dialog__fact">
                         <span className="health-status-dialog__fact-label">Socket ID</span>
-                        <code className="health-status-dialog__fact-value">
-                          {socketRef.current.id}
-                        </code>
+                        <code className="health-status-dialog__fact-value">{socketId}</code>
                       </div>
                     ) : null}
                   </div>
