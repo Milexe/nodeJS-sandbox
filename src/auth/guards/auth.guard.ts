@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
     const token = this.extractToken(request);
 
     if (!token) {
-      throw new UnauthorizedException('Токен не предоставлен');
+      throw new UnauthorizedException('Token not provided');
     }
 
     try {
@@ -27,7 +27,7 @@ export class AuthGuard implements CanActivate {
 
       request.user = payload;
     } catch {
-      throw new UnauthorizedException('Невалидный токен');
+      throw new UnauthorizedException('Invalid token');
     }
 
     return true;

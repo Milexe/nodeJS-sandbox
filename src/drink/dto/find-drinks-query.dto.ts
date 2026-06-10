@@ -113,7 +113,11 @@ export class FindDrinksQueryDto {
   @Min(1)
   page?: number;
 
-  @ApiPropertyOptional({ example: DRINKS_DEFAULT_LIMIT, minimum: 1, maximum: DRINKS_MAX_LIMIT })
+  @ApiPropertyOptional({
+    example: DRINKS_DEFAULT_LIMIT,
+    minimum: 1,
+    maximum: DRINKS_MAX_LIMIT,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

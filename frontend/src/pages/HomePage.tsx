@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import SocialLinks from '../components/SocialLinks'
-import { demos } from '../config/demos'
+import { demos, type Demo } from '../config/demos'
 import { apiUrl } from '../api'
 
 const PROJECT_TITLE = 'NodeJS Sandbox'
@@ -17,6 +17,51 @@ const techStack = [
   'Docker Compose for local PostgreSQL during development',
   'Deployed on Vercel (frontend), Render (API), and Neon (database)',
 ]
+
+function DemoCardBody({ demo }: { demo: Demo }) {
+  return (
+    <>
+      <span className="demo-card__title">
+        {demo.title}
+        {!demo.available ? (
+          <span className="demo-card__badge">Coming soon</span>
+        ) : demo.wip ? (
+          <span className="demo-card__badge demo-card__badge--wip">WIP</span>
+        ) : null}
+      </span>
+      <span className="demo-card__summary">{demo.summary}</span>
+    </>
+  )
+}
+
+function DemoCard({ demo }: { demo: Demo }) {
+  if (!demo.available) {
+    return (
+      <div className="demo-card demo-card--soon" aria-disabled="true">
+        <DemoCardBody demo={demo} />
+      </div>
+    )
+  }
+
+  if (demo.external) {
+    return (
+      <a
+        href={apiUrl(demo.path)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="demo-card demo-card--active"
+      >
+        <DemoCardBody demo={demo} />
+      </a>
+    )
+  }
+
+  return (
+    <Link to={demo.path} className="demo-card demo-card--active">
+      <DemoCardBody demo={demo} />
+    </Link>
+  )
+}
 
 export default function HomePage() {
   return (
@@ -50,32 +95,7 @@ export default function HomePage() {
         <ul className="demo-list">
           {demos.map((demo) => (
             <li key={demo.id} className="demo-list__item">
-              {demo.available ? (
-                demo.external ? (
-                  <a
-                    href={apiUrl(demo.path)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="demo-card demo-card--active"
-                  >
-                    <span className="demo-card__title">{demo.title}</span>
-                    <span className="demo-card__summary">{demo.summary}</span>
-                  </a>
-                ) : (
-                <Link to={demo.path} className="demo-card demo-card--active">
-                  <span className="demo-card__title">{demo.title}</span>
-                  <span className="demo-card__summary">{demo.summary}</span>
-                </Link>
-                )
-              ) : (
-                <div className="demo-card demo-card--soon" aria-disabled="true">
-                  <span className="demo-card__title">
-                    {demo.title}
-                    <span className="demo-card__badge">Coming soon</span>
-                  </span>
-                  <span className="demo-card__summary">{demo.summary}</span>
-                </div>
-              )}
+              <DemoCard demo={demo} />
             </li>
           ))}
         </ul>

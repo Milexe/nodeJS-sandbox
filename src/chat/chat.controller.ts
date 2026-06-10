@@ -9,7 +9,11 @@ export class ChatController {
 
   @Get('messages')
   @ApiOperation({ summary: 'Get recent chat messages' })
-  @ApiQuery({ name: 'before', required: false, description: 'Return messages before this message ID (cursor pagination)' })
+  @ApiQuery({
+    name: 'before',
+    required: false,
+    description: 'Return messages before this message ID (cursor pagination)',
+  })
   @ApiResponse({ status: 200, description: 'List of messages' })
   getMessages(@Query('before') before?: string) {
     const beforeId = before !== undefined ? Number(before) : undefined;

@@ -15,12 +15,12 @@ Portfolio sandbox for backend patterns, API demos, and full-stack experiments. E
 | REST API, CORS & Database | **Live** | Drinks catalog at `/drink` — CRUD, server-side search/sort/filters/pagination, image upload, CSV import, catalog cap (1000), `@nestjs/throttler` |
 | External API Proxy & Secret Handling | **Live** | ArtSearch artwork search via Nest — hides API key, validates queries, maps upstream errors and quota (`GET /gif`) |
 | JWT Authentication & Roles | Planned | Login, refresh tokens, guards, role-based access |
-| WebSockets & Real-time | Planned | Nest WebSocket gateway, rooms, push updates |
-| OpenAPI & Swagger | Planned | Interactive docs from controllers and DTOs |
+| WebSockets & Real-time | **Live** | Two-user chat via Nest WebSocket gateway — real-time broadcast, typing indicator, message history |
+| OpenAPI & Swagger | **WIP** | Interactive docs at `/api/docs` — schema and try-it-out UI generated from controllers and DTOs |
 
 ## Stack
 
-- **Backend:** NestJS, TypeScript, Prisma, PostgreSQL, class-validator, `@nestjs/throttler`, JWT (planned)
+- **Backend:** NestJS, TypeScript, Prisma, PostgreSQL, class-validator, `@nestjs/throttler`, `@nestjs/swagger`, WebSockets (Socket.IO), JWT (planned)
 - **Frontend:** React, Vite, React Router
 - **Data:** PostgreSQL on Neon (production), Docker Compose (local dev)
 - **Deploy:** Vercel (SPA), Render (API), Neon (database)
@@ -94,6 +94,15 @@ Images: uploads in `./uploads/` (max 2 MB; ephemeral on Render — redeploy clea
 ## External API proxy (ArtSearch)
 
 SPA `/gif`, API `GET /gif` — proxies the [ArtSearch](https://artsearch.io/) Search Artworks API. The browser never sees `ARTSEARCH_SECRET`; Nest validates query params via DTO (search text, type, material, technique, pagination), forwards the request with `x-api-key`, maps upstream errors (402 daily quota, 429 rate limit, timeouts), and surfaces quota from `X-Api-Quota-*` headers. Includes route logging middleware, throttling on GET routes, and client-side fallback data when the upstream is unavailable or the free-tier daily quota is exceeded (50 requests/day).
+
+## OpenAPI & Swagger (WIP)
+
+Interactive API docs generated from the Nest controllers and DTOs via `@nestjs/swagger`. Served at `GET /api/docs` (raw spec at `GET /api/docs-json`).
+
+- Gated behind `SWAGGER_ENABLED=true` so it can be toggled per environment (Render sets `NODE_ENV=production` at runtime, which would otherwise hide it).
+- DTOs are annotated with `@ApiProperty`/`@ApiPropertyOptional`; controllers carry `@ApiTags`, `@ApiOperation`, and `@ApiResponse`.
+- JWT-protected routes expose an **Authorize** button (`@ApiBearerAuth`) — paste an access token from `POST /auth/login` to call guarded endpoints from the browser.
+- The home page links to the live Swagger UI; same-origin requests from the docs page are allowed through CORS.
 
 ## Deployment
 

@@ -19,7 +19,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
-      throw new UnauthorizedException('Неверный email или пароль');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -28,7 +28,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Неверный email или пароль');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
@@ -65,7 +65,7 @@ export class AuthService {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
-      throw new UnauthorizedException('Пользователь не найден');
+      throw new UnauthorizedException('User not found');
     }
 
     return {
@@ -83,7 +83,7 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET!,
       });
     } catch {
-      throw new UnauthorizedException('Невалидный refresh токен');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const tokenHash = crypto
@@ -97,13 +97,13 @@ export class AuthService {
 
     if (!storedToken) {
       throw new UnauthorizedException(
-        'Refresh токен отозван или не существует',
+        'Refresh token revoked or does not exist',
       );
     }
 
     if (storedToken.expiresAt < new Date()) {
       await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
-      throw new UnauthorizedException('Refresh токен истёк');
+      throw new UnauthorizedException('Refresh token expired');
     }
 
     await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
@@ -148,7 +148,7 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET!,
       });
     } catch {
-      throw new UnauthorizedException('Невалидный refresh токен');
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const tokenHash = crypto
@@ -161,11 +161,11 @@ export class AuthService {
     });
 
     if (!storedToken) {
-      throw new UnauthorizedException('Refresh токен не найден');
+      throw new UnauthorizedException('Refresh token not found');
     }
 
     await this.prisma.refreshToken.delete({ where: { id: storedToken.id } });
 
-    return { message: 'Вы успешно вышли из системы' };
+    return { message: 'Successfully logged out' };
   }
 }

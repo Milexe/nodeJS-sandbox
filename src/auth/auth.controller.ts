@@ -8,7 +8,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -73,6 +78,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Access granted' })
   @ApiResponse({ status: 403, description: 'Forbidden — admin role required' })
   adminOnly() {
-    return { message: 'Доступ только для админов' };
+    return { message: 'Admins only' };
   }
 }

@@ -5,6 +5,7 @@ export type Demo = {
   path: string
   available: boolean
   external?: boolean
+  wip?: boolean
 }
 
 export const demos: Demo[] = [
@@ -46,6 +47,7 @@ export const demos: Demo[] = [
     path: '/api/docs',
     available: true,
     external: true,
+    wip: true,
   },
 ]
 

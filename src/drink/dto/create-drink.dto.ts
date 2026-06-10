@@ -22,13 +22,21 @@ export class CreateDrinkDto {
   @MaxLength(DRINK_TITLE_MAX_LENGTH)
   title: string;
 
-  @ApiPropertyOptional({ example: 'Dark Irish dry stout', maxLength: DRINK_DESCRIPTION_MAX_LENGTH })
+  @ApiPropertyOptional({
+    example: 'Dark Irish dry stout',
+    maxLength: DRINK_DESCRIPTION_MAX_LENGTH,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(DRINK_DESCRIPTION_MAX_LENGTH)
   description?: string;
 
-  @ApiProperty({ example: 4.2, minimum: 0, maximum: 100, description: 'Alcohol by volume (%)' })
+  @ApiProperty({
+    example: 4.2,
+    minimum: 0,
+    maximum: 100,
+    description: 'Alcohol by volume (%)',
+  })
   @Type(() => Number)
   @IsNumber({ ...numberOpts, maxDecimalPlaces: 1 })
   @Min(0, { message: 'ABV must be at least 0' })

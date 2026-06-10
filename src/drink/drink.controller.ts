@@ -79,7 +79,15 @@ export class DrinkController {
     schema: {
       allOf: [
         { $ref: getSchemaPath(CreateDrinkDto) },
-        { properties: { image: { type: 'string', format: 'binary', description: 'Optional drink image' } } },
+        {
+          properties: {
+            image: {
+              type: 'string',
+              format: 'binary',
+              description: 'Optional drink image',
+            },
+          },
+        },
       ],
     },
   })
@@ -98,7 +106,9 @@ export class DrinkController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
-      properties: { file: { type: 'string', format: 'binary', description: 'CSV file' } },
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'CSV file' },
+      },
       required: ['file'],
     },
   })
@@ -120,7 +130,9 @@ export class DrinkController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List drinks with filters, sorting, and pagination' })
+  @ApiOperation({
+    summary: 'List drinks with filters, sorting, and pagination',
+  })
   @ApiResponse({ status: 200, description: 'Paginated list of drinks' })
   findAll(@Query() query: FindDrinksQueryDto) {
     return this.drinkService.findAll(query);
@@ -146,7 +158,15 @@ export class DrinkController {
     schema: {
       allOf: [
         { $ref: getSchemaPath(UpdateDrinkDto) },
-        { properties: { image: { type: 'string', format: 'binary', description: 'Replacement image' } } },
+        {
+          properties: {
+            image: {
+              type: 'string',
+              format: 'binary',
+              description: 'Replacement image',
+            },
+          },
+        },
       ],
     },
   })

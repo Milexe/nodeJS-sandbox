@@ -18,7 +18,10 @@ import {
 } from '../gif.constants';
 
 export class FindArtworksQueryDto {
-  @ApiPropertyOptional({ example: 'landscape', maxLength: ARTWORKS_MAX_QUERY_LENGTH })
+  @ApiPropertyOptional({
+    example: 'landscape',
+    maxLength: ARTWORKS_MAX_QUERY_LENGTH,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(ARTWORKS_MAX_QUERY_LENGTH)
